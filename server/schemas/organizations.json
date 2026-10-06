@@ -1,0 +1,26 @@
+{
+  "table": "organizations",
+  "description": "Customer organizations (tenants) subscribed to the product.",
+  "partitionKey": "organization_id",
+  "attributes": [
+    { "name": "organization_id", "type": "string", "description": "Unique organization ID, lowercase slug of the name (e.g. acme)." },
+    { "name": "name", "type": "string", "description": "Display name of the organization." },
+    { "name": "plan", "type": "string", "description": "Subscription plan: free, pro or enterprise." },
+    { "name": "status", "type": "string", "description": "Account status: active or suspended." },
+    { "name": "country", "type": "string", "description": "ISO 3166-1 alpha-2 country code." },
+    { "name": "created_at", "type": "string", "description": "ISO 8601 timestamp when the organization signed up." }
+  ],
+  "indexes": [
+    { "name": "plan-created-at-index", "partitionKey": "plan", "sortKey": "created_at" }
+  ],
+  "accessPatterns": [
+    { "description": "Get an organization by its ID." },
+    { "description": "List organizations on a plan, optionally within a signup date range.", "index": "plan-created-at-index" }
+  ],
+  "exampleRecords": [
+    { "organization_id": "acme", "name": "Acme Corp", "plan": "enterprise", "status": "active", "country": "US", "created_at": "2025-03-14T09:00:00Z" },
+    { "organization_id": "globex", "name": "Globex Inc", "plan": "pro", "status": "active", "country": "DE", "created_at": "2025-11-02T12:30:00Z" },
+    { "organization_id": "initech", "name": "Initech", "plan": "free", "status": "suspended", "country": "US", "created_at": "2026-08-20T08:15:00Z" },
+    { "organization_id": "umbrella", "name": "Umbrella Ltd", "plan": "pro", "status": "active", "country": "GB", "created_at": "2026-09-05T16:45:00Z" }
+  ]
+}

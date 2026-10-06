@@ -1,0 +1,33 @@
+{
+  "table": "invoices",
+  "description": "Billing invoices issued to organizations.",
+  "partitionKey": "organization_id",
+  "sortKey": "issued_at",
+  "attributes": [
+    { "name": "organization_id", "type": "string", "description": "ID of the billed organization." },
+    { "name": "issued_at", "type": "string", "description": "ISO 8601 timestamp when the invoice was issued." },
+    { "name": "invoice_id", "type": "string", "description": "Invoice number (e.g. inv_001)." },
+    { "name": "amount", "type": "number", "description": "Invoice total in the invoice currency." },
+    { "name": "currency", "type": "string", "description": "ISO 4217 currency code." },
+    { "name": "status", "type": "string", "description": "Payment status: paid, open or overdue." },
+    { "name": "due_date", "type": "string", "description": "Payment due date in YYYY-MM-DD format." }
+  ],
+  "indexes": [
+    { "name": "status-issued-at-index", "partitionKey": "status", "sortKey": "issued_at" }
+  ],
+  "accessPatterns": [
+    { "description": "List invoices of an organization, optionally within an issue date range." },
+    { "description": "List invoices with a given payment status across all organizations, optionally within an issue date range.", "index": "status-issued-at-index" }
+  ],
+  "exampleRecords": [
+    { "organization_id": "acme", "issued_at": "2026-07-01T00:00:00Z", "invoice_id": "inv_001", "amount": 4999, "currency": "USD", "status": "paid", "due_date": "2026-07-31" },
+    { "organization_id": "acme", "issued_at": "2026-08-01T00:00:00Z", "invoice_id": "inv_002", "amount": 4999, "currency": "USD", "status": "paid", "due_date": "2026-08-31" },
+    { "organization_id": "acme", "issued_at": "2026-09-01T00:00:00Z", "invoice_id": "inv_003", "amount": 5499, "currency": "USD", "status": "overdue", "due_date": "2026-09-30" },
+    { "organization_id": "acme", "issued_at": "2026-10-01T00:00:00Z", "invoice_id": "inv_004", "amount": 5499, "currency": "USD", "status": "open", "due_date": "2026-10-31" },
+    { "organization_id": "globex", "issued_at": "2026-08-01T00:00:00Z", "invoice_id": "inv_005", "amount": 899, "currency": "EUR", "status": "paid", "due_date": "2026-08-31" },
+    { "organization_id": "globex", "issued_at": "2026-09-01T00:00:00Z", "invoice_id": "inv_006", "amount": 899, "currency": "EUR", "status": "paid", "due_date": "2026-09-30" },
+    { "organization_id": "globex", "issued_at": "2026-10-01T00:00:00Z", "invoice_id": "inv_007", "amount": 899, "currency": "EUR", "status": "open", "due_date": "2026-10-31" },
+    { "organization_id": "umbrella", "issued_at": "2026-09-05T17:00:00Z", "invoice_id": "inv_008", "amount": 499, "currency": "GBP", "status": "overdue", "due_date": "2026-10-05" },
+    { "organization_id": "umbrella", "issued_at": "2026-10-05T17:00:00Z", "invoice_id": "inv_009", "amount": 499, "currency": "GBP", "status": "open", "due_date": "2026-11-04" }
+  ]
+}

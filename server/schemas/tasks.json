@@ -1,0 +1,40 @@
+{
+  "table": "tasks",
+  "description": "Work items inside a project, assigned to users.",
+  "partitionKey": "project_id",
+  "sortKey": "task_id",
+  "attributes": [
+    { "name": "project_id", "type": "string", "description": "ID of the project the task belongs to." },
+    { "name": "task_id", "type": "string", "description": "Unique task ID (e.g. t_001)." },
+    { "name": "organization_id", "type": "string", "description": "ID of the organization that owns the project." },
+    { "name": "title", "type": "string", "description": "Short task title." },
+    { "name": "status", "type": "string", "description": "Task status: todo, in_progress or done." },
+    { "name": "priority", "type": "string", "description": "Task priority: low, medium or high." },
+    { "name": "assignee_id", "type": "string", "description": "User ID of the person assigned to the task." },
+    { "name": "due_date", "type": "string", "description": "Due date in YYYY-MM-DD format." },
+    { "name": "created_at", "type": "string", "description": "ISO 8601 timestamp when the task was created." }
+  ],
+  "indexes": [
+    { "name": "assignee-due-date-index", "partitionKey": "assignee_id", "sortKey": "due_date" },
+    { "name": "project-status-index", "partitionKey": "project_id", "sortKey": "status" }
+  ],
+  "accessPatterns": [
+    { "description": "List all tasks of a project." },
+    { "description": "Get a single task by project ID and task ID." },
+    { "description": "List tasks assigned to a user, optionally within a due date range.", "index": "assignee-due-date-index" },
+    { "description": "List tasks of a project with a given status.", "index": "project-status-index" }
+  ],
+  "exampleRecords": [
+    { "project_id": "p_001", "task_id": "t_001", "organization_id": "acme", "title": "Design homepage", "status": "done", "priority": "high", "assignee_id": "u_001", "due_date": "2026-09-15", "created_at": "2026-08-01T09:00:00Z" },
+    { "project_id": "p_001", "task_id": "t_002", "organization_id": "acme", "title": "Build navbar", "status": "in_progress", "priority": "medium", "assignee_id": "u_002", "due_date": "2026-10-10", "created_at": "2026-09-04T09:00:00Z" },
+    { "project_id": "p_001", "task_id": "t_003", "organization_id": "acme", "title": "Write copy", "status": "todo", "priority": "low", "assignee_id": "u_003", "due_date": "2026-10-20", "created_at": "2026-09-19T09:00:00Z" },
+    { "project_id": "p_002", "task_id": "t_004", "organization_id": "acme", "title": "Set up CI", "status": "done", "priority": "medium", "assignee_id": "u_002", "due_date": "2026-09-20", "created_at": "2026-09-05T10:00:00Z" },
+    { "project_id": "p_002", "task_id": "t_005", "organization_id": "acme", "title": "Login screen", "status": "in_progress", "priority": "high", "assignee_id": "u_005", "due_date": "2026-10-08", "created_at": "2026-10-01T11:00:00Z" },
+    { "project_id": "p_002", "task_id": "t_006", "organization_id": "acme", "title": "Push notifications", "status": "todo", "priority": "high", "assignee_id": "u_002", "due_date": "2026-10-30", "created_at": "2026-10-01T11:30:00Z" },
+    { "project_id": "p_004", "task_id": "t_007", "organization_id": "globex", "title": "Ingest pipeline", "status": "in_progress", "priority": "high", "assignee_id": "u_006", "due_date": "2026-10-12", "created_at": "2026-09-01T09:00:00Z" },
+    { "project_id": "p_004", "task_id": "t_008", "organization_id": "globex", "title": "Schema registry", "status": "todo", "priority": "medium", "assignee_id": "u_007", "due_date": "2026-11-01", "created_at": "2026-09-13T09:00:00Z" },
+    { "project_id": "p_005", "task_id": "t_009", "organization_id": "initech", "title": "Cover sheet", "status": "todo", "priority": "low", "assignee_id": "u_008", "due_date": "2026-10-15", "created_at": "2026-08-22T10:00:00Z" },
+    { "project_id": "p_006", "task_id": "t_010", "organization_id": "umbrella", "title": "Sample tracking", "status": "in_progress", "priority": "high", "assignee_id": "u_009", "due_date": "2026-10-09", "created_at": "2026-09-10T12:30:00Z" },
+    { "project_id": "p_006", "task_id": "t_011", "organization_id": "umbrella", "title": "Audit export", "status": "todo", "priority": "medium", "assignee_id": "u_010", "due_date": "2026-10-25", "created_at": "2026-09-28T10:20:00Z" }
+  ]
+}

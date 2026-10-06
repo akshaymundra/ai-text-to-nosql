@@ -1,0 +1,76 @@
+# CLAUDE.md
+
+This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
+
+## Project
+
+Go service that turns natural-language requests into schema-grounded DynamoDB `QueryInput`s. Full design and Phase 1 scope live in `idea.md`; read it before adding pipeline stages.
+
+Core principle: the LLM is only a parser (English to IR). Index selection, scan detection, validation and compilation are deterministic code. The IR never names an index; the planner picks it. Keep LLM output out of any decision the planner/validator owns.
+
+Pipeline (target, mostly unbuilt): schema retrieval (pgvector, one row per access pattern) → LLM intent extraction (structured output, enums from retrieved schema) → access-path planner → validator → compiler → `POST /api/v1/query`. Requests needing a scan are rejected; non-key conditions go to `FilterExpression` and return `valid` with a warning.
+
+Build order from `idea.md`: planner/validator/compiler are pure code, built test-first with no LLM, before retrieval and LLM work.
+
+## Commands
+
+```sh
+make run      # go run ./cmd/api (SERVER_PORT default 3000, APP_ENV default development)
+make build    # bin/api
+make test     # go test -race ./...
+make lint     # golangci-lint run ./...
+make seed     # go run ./cmd/seed-local
+go test -race -run TestName ./internal/<pkg>   # single test
+```
+
+`make seed` needs DynamoDB Local (default `http://localhost:8081`, override with `DYNAMODB_ENDPOINT`). It **drops and recreates** every table in `schemas/`, then batch-inserts `exampleRecords`. Must run from repo root (reads `schemas/` relatively).
+
+## Architecture
+
+- `schemas/*.json`: source of truth for tables. Each file defines table, PK/SK, attributes (with types and descriptions), GSIs, `accessPatterns` and `exampleRecords`. Loaded by `internal/schema.LoadDir`. Adding a table = adding a JSON file; seed and (later) retrieval pick it up automatically. Key attributes must be `string` or `number` (only those map to DynamoDB scalar types in `cmd/seed-local`).
+- `cmd/api`: entrypoint. `App` wires config, zap logger, chi router; graceful shutdown on SIGINT/SIGTERM.
+- `cmd/seed-local`: standalone DynamoDB Local seeder, uses static `local` credentials.
+- `internal/routes`: `routes.go` sets global middleware (Recoverer, RequestID, request logger, CORS), `/health`, `/ready`, and mounts feature route groups in `registerRoutes`. Each feature gets its own file (e.g. `query.go`) that constructs service → handler and returns a `func(chi.Router)`.
+- Layering: routes → `handler` → `service` → `repo`. Currently `QueryService`/`QueryHandler` are empty stubs and `/api/v1/query` has no endpoints.
+- `internal/config`: `sync.Once` singleton from env vars; call `config.Init()` before `GetInstance()`.
+- `internal/apperror` + `internal/constants`: typed `AppError` with code and HTTP status; error codes live in `constants/errors.go`.
+- `internal/utils/response.go`: `JSON` / `JSONError` wrap payloads as `{"data": ...}` / `{"error": ...}`.
+- Empty placeholder dirs (`model`, `repo`, `types`, `validations`, `middleware`, `routes/s2s`) mark where those concerns go; put new code there rather than inventing new packages.
+
+## MCP Tools: code-review-graph
+
+**IMPORTANT: This project has a knowledge graph. ALWAYS use the
+code-review-graph MCP tools BEFORE using Grep/Glob/Read to explore
+the codebase.** The graph is faster, cheaper (fewer tokens), and gives
+you structural context (callers, dependents, test coverage) that file
+scanning cannot.
+
+### When to use graph tools FIRST
+
+- **Exploring code**: `semantic_search_nodes` or `query_graph` instead of Grep
+- **Understanding impact**: `get_impact_radius` instead of manually tracing imports
+- **Code review**: `detect_changes` + `get_review_context` instead of reading entire files
+- **Finding relationships**: `query_graph` with callers_of/callees_of/imports_of/tests_for
+- **Architecture questions**: `get_architecture_overview` + `list_communities`
+
+Fall back to Grep/Glob/Read **only** when the graph doesn't cover what you need.
+
+### Key Tools
+
+| Tool | Use when |
+| ------ | ---------- |
+| `detect_changes` | Reviewing code changes — gives risk-scored analysis |
+| `get_review_context` | Need source snippets for review — token-efficient |
+| `get_impact_radius` | Understanding blast radius of a change |
+| `get_affected_flows` | Finding which execution paths are impacted |
+| `query_graph` | Tracing callers, callees, imports, tests, dependencies |
+| `semantic_search_nodes` | Finding functions/classes by name or keyword |
+| `get_architecture_overview` | Understanding high-level codebase structure |
+| `refactor_tool` | Planning renames, finding dead code |
+
+### Workflow
+
+1. The graph auto-updates on file changes (via hooks).
+2. Use `detect_changes` for code review.
+3. Use `get_affected_flows` to understand impact.
+4. Use `query_graph` pattern="tests_for" to check coverage.

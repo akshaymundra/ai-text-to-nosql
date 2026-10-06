@@ -1,0 +1,31 @@
+# Binaries
+*.exe
+*.exe~
+*.dll
+*.so
+*.dylib
+bin/
+
+# Test binaries
+*.test
+
+# Coverage output
+*.out
+
+# Go workspace
+go.work
+
+# Env / secrets
+.env
+
+# Local dev
+.vscode
+__debug_bin*
+
+# Claude Code files
+.claude.local
+.agents/
+skills-lock.json
+
+# Code review graph
+.code-review-graph/

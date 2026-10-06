@@ -1,0 +1,33 @@
+{
+  "table": "audit_logs",
+  "description": "Security and activity events recorded per organization.",
+  "partitionKey": "organization_id",
+  "sortKey": "created_at",
+  "attributes": [
+    { "name": "organization_id", "type": "string", "description": "ID of the organization the event belongs to." },
+    { "name": "created_at", "type": "string", "description": "ISO 8601 timestamp when the event happened." },
+    { "name": "actor_id", "type": "string", "description": "User ID of the user who performed the action." },
+    { "name": "action", "type": "string", "description": "Event type: user.login, user.invite, user.disable, project.create or task.update." },
+    { "name": "resource_type", "type": "string", "description": "Type of the affected resource: user, project or task." },
+    { "name": "resource_id", "type": "string", "description": "ID of the affected resource." }
+  ],
+  "indexes": [
+    { "name": "actor-created-at-index", "partitionKey": "actor_id", "sortKey": "created_at" }
+  ],
+  "accessPatterns": [
+    { "description": "List audit events of an organization, optionally within a time range." },
+    { "description": "List audit events performed by a user, optionally within a time range.", "index": "actor-created-at-index" }
+  ],
+  "exampleRecords": [
+    { "organization_id": "acme", "created_at": "2026-09-03T11:25:00Z", "actor_id": "u_002", "action": "user.login", "resource_type": "user", "resource_id": "u_002" },
+    { "organization_id": "acme", "created_at": "2026-09-05T09:00:00Z", "actor_id": "u_002", "action": "project.create", "resource_type": "project", "resource_id": "p_002" },
+    { "organization_id": "acme", "created_at": "2026-09-20T17:10:00Z", "actor_id": "u_002", "action": "task.update", "resource_type": "task", "resource_id": "t_004" },
+    { "organization_id": "acme", "created_at": "2026-09-25T09:45:00Z", "actor_id": "u_001", "action": "user.disable", "resource_type": "user", "resource_id": "u_004" },
+    { "organization_id": "acme", "created_at": "2026-10-01T10:05:00Z", "actor_id": "u_005", "action": "user.login", "resource_type": "user", "resource_id": "u_005" },
+    { "organization_id": "globex", "created_at": "2026-09-12T15:35:00Z", "actor_id": "u_007", "action": "user.login", "resource_type": "user", "resource_id": "u_007" },
+    { "organization_id": "globex", "created_at": "2026-10-02T08:00:00Z", "actor_id": "u_006", "action": "task.update", "resource_type": "task", "resource_id": "t_007" },
+    { "organization_id": "initech", "created_at": "2026-08-22T09:00:00Z", "actor_id": "u_008", "action": "project.create", "resource_type": "project", "resource_id": "p_005" },
+    { "organization_id": "umbrella", "created_at": "2026-09-10T12:00:00Z", "actor_id": "u_009", "action": "project.create", "resource_type": "project", "resource_id": "p_006" },
+    { "organization_id": "umbrella", "created_at": "2026-09-28T10:15:00Z", "actor_id": "u_009", "action": "user.invite", "resource_type": "user", "resource_id": "u_010" }
+  ]
+}

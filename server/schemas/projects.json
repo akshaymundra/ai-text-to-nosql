@@ -1,0 +1,30 @@
+{
+  "table": "projects",
+  "description": "Projects owned by an organization.",
+  "partitionKey": "organization_id",
+  "sortKey": "project_id",
+  "attributes": [
+    { "name": "organization_id", "type": "string", "description": "ID of the organization that owns the project." },
+    { "name": "project_id", "type": "string", "description": "Unique project ID (e.g. p_001)." },
+    { "name": "name", "type": "string", "description": "Project name." },
+    { "name": "status", "type": "string", "description": "Project status: active or archived." },
+    { "name": "owner_id", "type": "string", "description": "User ID of the project owner." },
+    { "name": "created_at", "type": "string", "description": "ISO 8601 timestamp when the project was created." }
+  ],
+  "indexes": [
+    { "name": "owner-created-at-index", "partitionKey": "owner_id", "sortKey": "created_at" }
+  ],
+  "accessPatterns": [
+    { "description": "List all projects of an organization." },
+    { "description": "Get a single project by organization ID and project ID." },
+    { "description": "List projects owned by a user, optionally within a creation date range.", "index": "owner-created-at-index" }
+  ],
+  "exampleRecords": [
+    { "organization_id": "acme", "project_id": "p_001", "name": "Website Redesign", "status": "active", "owner_id": "u_001", "created_at": "2026-01-10T09:00:00Z" },
+    { "organization_id": "acme", "project_id": "p_002", "name": "Mobile App", "status": "active", "owner_id": "u_002", "created_at": "2026-09-05T09:00:00Z" },
+    { "organization_id": "acme", "project_id": "p_003", "name": "Legacy Migration", "status": "archived", "owner_id": "u_001", "created_at": "2025-06-01T09:00:00Z" },
+    { "organization_id": "globex", "project_id": "p_004", "name": "Data Platform", "status": "active", "owner_id": "u_006", "created_at": "2026-02-15T09:00:00Z" },
+    { "organization_id": "initech", "project_id": "p_005", "name": "TPS Reports", "status": "active", "owner_id": "u_008", "created_at": "2026-08-22T09:00:00Z" },
+    { "organization_id": "umbrella", "project_id": "p_006", "name": "Vaccine Tracker", "status": "active", "owner_id": "u_009", "created_at": "2026-09-10T12:00:00Z" }
+  ]
+}
