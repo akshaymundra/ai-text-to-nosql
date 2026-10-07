@@ -8,6 +8,7 @@ import (
 
 	"github.com/akshaymundra/ai-text-to-nosql/internal/config"
 	"github.com/akshaymundra/ai-text-to-nosql/internal/routes"
+	"github.com/jackc/pgx/v5/pgxpool"
 	"go.uber.org/zap"
 )
 
@@ -15,19 +16,47 @@ type App struct {
 	config *config.Config
 	router http.Handler
 	logger *zap.Logger
+	db     *pgxpool.Pool
 }
 
-func NewApp(cfg *config.Config) *App {
+func NewApp(ctx context.Context, cfg *config.Config) (*App, error) {
 	logger, _ := zap.NewProduction()
+
+	db, err := newPostgresPool(ctx, cfg.DatabaseURL, cfg.DBPingTimeout)
+	if err != nil {
+		return nil, err
+	}
 
 	app := &App{
 		config: cfg,
 		logger: logger,
+		db:     db,
 	}
 
 	app.router = routes.NewRoutes(logger)
 
-	return app
+	return app, nil
+}
+
+func (a *App) Close() {
+	a.db.Close()
+}
+
+func newPostgresPool(ctx context.Context, url string, pingTimeout time.Duration) (*pgxpool.Pool, error) {
+	pool, err := pgxpool.New(ctx, url)
+	if err != nil {
+		return nil, fmt.Errorf("creating postgres pool: %w", err)
+	}
+
+	pingCtx, cancel := context.WithTimeout(ctx, pingTimeout)
+	defer cancel()
+
+	if err := pool.Ping(pingCtx); err != nil {
+		pool.Close()
+		return nil, fmt.Errorf("pinging postgres: %w", err)
+	}
+
+	return pool, nil
 }
 
 func (a *App) Start(ctx context.Context) error {

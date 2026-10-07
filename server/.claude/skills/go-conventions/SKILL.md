@@ -14,11 +14,11 @@ Project rules beat community Go advice. "Clear is better than clever": minimal s
 
 | Concern | Location | Pattern |
 |---|---|---|
-| Entrypoints | `cmd/api`, `cmd/seed-local` | `main` only wires things; no business logic. |
+| Entrypoints | `cmd/api`, `cmd/seed-local` | `main` only wires things; no business logic. `cmd/api/app.go` opens DB clients (Postgres pool) and injects them downward. |
 | Routes | `internal/routes/<feature>.go` | `func <Feature>Routes() func(chi.Router)` builds service → handler and mounts handlers; register it in `registerRoutes` in `routes.go`. |
 | HTTP handlers | `internal/handler/<feature>.go` | Methods on the handler struct declared in `handler/init.go`. Decode request, call service, write response. No business logic. |
 | Business logic | `internal/service/<feature>.go` | Methods on the service struct declared in `service/init.go`. Orchestrates pipeline stages, repos and integrations. |
-| Persistence / external stores | `internal/repo/` | DynamoDB execution, Postgres registry and pgvector queries. Returns domain types, not driver types. |
+| Persistence / external stores | `internal/repo/` | Queries only: DynamoDB execution, Postgres registry and pgvector queries. Receives its client (e.g. `*pgxpool.Pool`) via constructor; never opens connections. Returns domain types, not driver types. |
 | Request/response DTOs | `internal/types/` | JSON-tagged structs for the HTTP API. |
 | HTTP input validation | `internal/validations/` | Validates request payloads only. **Not** the DynamoDB query validator. |
 | Persistence models | `internal/model/` | Structs mapped to Postgres rows. |
