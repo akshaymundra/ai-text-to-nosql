@@ -57,11 +57,11 @@ go test -race -run TestName ./internal/<pkg>   # single test
 - `internal/config`: `sync.Once` singleton from env vars; call `config.Init()` before `GetInstance()`. `Init` loads `.env` via godotenv (missing file ignored, real env vars win). `.env.sample` lists app keys only; `DYNAMODB_ENDPOINT` is seed-only.
 - `internal/apperror` + `internal/constants`: typed `AppError` with code and HTTP status; error codes live in `constants/errors.go`.
 - `internal/utils/response.go`: `JSON` / `JSONError` wrap payloads as `{"data": ...}` / `{"error": ...}`.
-- Empty placeholder dirs (`model`, `repo`, `types`, `validations`, `middleware`, `routes/s2s`) mark where those concerns go; put new code there rather than inventing new packages.
+- Empty placeholder dirs (`model`, `repo`, `types`, `validations`, `middleware`, `routes/s2s`) mark where those concerns go. Pipeline stages go in `internal/service/<stage>/` (pure subpackages, wired by `QueryService`), external API wrappers in `internal/integrations/<name>/`. The full placement table is in the `go-conventions` skill; do not invent other packages.
 
 ## Project skills and hooks
 
-- Skills in `server/.claude/skills/`: `dynamodb-query-rules` (DynamoDB Query semantics, verified against AWS docs), `eval-harness` (eval case format, `make eval`, prompt-change workflow), `schema-authoring` (writing `schemas-local/*.json`).
+- Skills in `server/.claude/skills/`: `go-conventions` (package layout, layering, errors, logging, tests, style; load before writing Go), `dynamodb-query-rules` (DynamoDB Query semantics, verified against AWS docs), `eval-harness` (eval case format, `make eval`, prompt-change workflow), `schema-authoring` (writing `schemas-local/*.json`).
 - A Stop hook (`.claude/hooks/go-check.sh` at the repo root) runs `go vet ./...` and `go test ./...` in `server/` when Go files have uncommitted changes, and blocks once with the failure output. Fix failures; do not bypass it.
 
 ## MCP Tools: code-review-graph
