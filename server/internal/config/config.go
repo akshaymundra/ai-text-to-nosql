@@ -3,6 +3,8 @@ package config
 import (
 	"os"
 	"sync"
+
+	"github.com/joho/godotenv"
 )
 
 type Config struct {
@@ -17,6 +19,7 @@ var (
 
 func Init() {
 	once.Do(func() {
+		_ = godotenv.Load()
 		instance = &Config{
 			ServerPort: getEnv("SERVER_PORT", "3000"),
 			AppEnv:     getEnv("APP_ENV", "development"),

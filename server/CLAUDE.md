@@ -4,13 +4,15 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project
 
-Go service that turns natural-language requests into schema-grounded DynamoDB `QueryInput`s. Full design and Phase 1 scope live in `idea.md`; read it before adding pipeline stages.
+Go service that turns natural-language requests into schema-grounded DynamoDB `QueryInput`s. Full design and Phase 1 scope live in `docs/idea.md`; read it before adding pipeline stages.
+
+Repo layout: `server/` (this Go service) and `client/` (planned frontend for configuring schemas and running queries). Git root is the parent dir.
 
 Core principle: the LLM is only a parser (English to IR). Index selection, scan detection, validation and compilation are deterministic code. The IR never names an index; the planner picks it. Keep LLM output out of any decision the planner/validator owns.
 
 Pipeline (target, mostly unbuilt): schema retrieval (pgvector, one row per access pattern) → LLM intent extraction (structured output, enums from retrieved schema) → access-path planner → validator → compiler → `POST /api/v1/query`. Requests needing a scan are rejected; non-key conditions go to `FilterExpression` and return `valid` with a warning.
 
-Build order from `idea.md`: planner/validator/compiler are pure code, built test-first with no LLM, before retrieval and LLM work.
+Build order from `docs/idea.md`: planner/validator/compiler are pure code, built test-first with no LLM, before retrieval and LLM work.
 
 ## Commands
 
@@ -23,16 +25,16 @@ make seed     # go run ./cmd/seed-local
 go test -race -run TestName ./internal/<pkg>   # single test
 ```
 
-`make seed` needs DynamoDB Local (default `http://localhost:8081`, override with `DYNAMODB_ENDPOINT`). It **drops and recreates** every table in `schemas/`, then batch-inserts `exampleRecords`. Must run from repo root (reads `schemas/` relatively).
+`make seed` needs DynamoDB Local (default `http://localhost:8081`, override with `DYNAMODB_ENDPOINT`). It **drops and recreates** every table in `schemas-local/`, then batch-inserts `exampleRecords`. Must run from `server/` (reads `schemas-local/` relatively).
 
 ## Architecture
 
-- `schemas/*.json`: source of truth for tables. Each file defines table, PK/SK, attributes (with types and descriptions), GSIs, `accessPatterns` and `exampleRecords`. Loaded by `internal/schema.LoadDir`. Adding a table = adding a JSON file; seed and (later) retrieval pick it up automatically. Key attributes must be `string` or `number` (only those map to DynamoDB scalar types in `cmd/seed-local`).
+- `schemas-local/*.json`: source of truth for tables. Each file defines table, PK/SK, attributes (with types and descriptions), GSIs, `accessPatterns` and `exampleRecords`. Loaded by `internal/schema.LoadDir`. Adding a table = adding a JSON file; seed and (later) retrieval pick it up automatically. Key attributes must be `string` or `number` (only those map to DynamoDB scalar types in `cmd/seed-local`).
 - `cmd/api`: entrypoint. `App` wires config, zap logger, chi router; graceful shutdown on SIGINT/SIGTERM.
-- `cmd/seed-local`: standalone DynamoDB Local seeder, uses static `local` credentials.
+- `cmd/seed-local`: standalone DynamoDB Local seeder, uses static `local` credentials, loads `.env` itself, and refuses any endpoint whose host is not localhost/127.0.0.1/::1.
 - `internal/routes`: `routes.go` sets global middleware (Recoverer, RequestID, request logger, CORS), `/health`, `/ready`, and mounts feature route groups in `registerRoutes`. Each feature gets its own file (e.g. `query.go`) that constructs service → handler and returns a `func(chi.Router)`.
 - Layering: routes → `handler` → `service` → `repo`. Currently `QueryService`/`QueryHandler` are empty stubs and `/api/v1/query` has no endpoints.
-- `internal/config`: `sync.Once` singleton from env vars; call `config.Init()` before `GetInstance()`.
+- `internal/config`: `sync.Once` singleton from env vars; call `config.Init()` before `GetInstance()`. `Init` loads `.env` via godotenv (missing file ignored, real env vars win). `.env.sample` lists app keys only; `DYNAMODB_ENDPOINT` is seed-only.
 - `internal/apperror` + `internal/constants`: typed `AppError` with code and HTTP status; error codes live in `constants/errors.go`.
 - `internal/utils/response.go`: `JSON` / `JSONError` wrap payloads as `{"data": ...}` / `{"error": ...}`.
 - Empty placeholder dirs (`model`, `repo`, `types`, `validations`, `middleware`, `routes/s2s`) mark where those concerns go; put new code there rather than inventing new packages.

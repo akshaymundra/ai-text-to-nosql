@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"log"
+	"net/url"
 	"os"
 	"time"
 
@@ -14,6 +15,7 @@ import (
 	"github.com/aws/aws-sdk-go-v2/feature/dynamodb/attributevalue"
 	"github.com/aws/aws-sdk-go-v2/service/dynamodb"
 	"github.com/aws/aws-sdk-go-v2/service/dynamodb/types"
+	"github.com/joho/godotenv"
 
 	"github.com/akshaymundra/ai-text-to-nosql/internal/schema"
 )
@@ -29,10 +31,17 @@ var scalarTypes = map[string]types.ScalarAttributeType{
 	"number": types.ScalarAttributeTypeN,
 }
 
+var localHosts = map[string]bool{
+	"localhost": true,
+	"127.0.0.1": true,
+	"::1":       true,
+}
+
 func main() {
 	ctx := context.Background()
+	_ = godotenv.Load()
 
-	tables, err := schema.LoadDir("schemas")
+	tables, err := schema.LoadDir("schemas-local")
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -58,6 +67,9 @@ func newClient(ctx context.Context) (*dynamodb.Client, error) {
 	if endpoint == "" {
 		endpoint = defaultEndpoint
 	}
+	if err := requireLocal(endpoint); err != nil {
+		return nil, err
+	}
 
 	cfg, err := config.LoadDefaultConfig(ctx,
 		config.WithRegion("ap-south-1"),
@@ -70,6 +82,17 @@ func newClient(ctx context.Context) (*dynamodb.Client, error) {
 	return dynamodb.NewFromConfig(cfg, func(o *dynamodb.Options) {
 		o.BaseEndpoint = aws.String(endpoint)
 	}), nil
+}
+
+func requireLocal(endpoint string) error {
+	u, err := url.Parse(endpoint)
+	if err != nil {
+		return err
+	}
+	if !localHosts[u.Hostname()] {
+		return fmt.Errorf("refusing to seed non-local endpoint %q: seeding drops every table", endpoint)
+	}
+	return nil
 }
 
 func recreateTable(ctx context.Context, client *dynamodb.Client, t schema.Table) error {

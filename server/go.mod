@@ -10,6 +10,7 @@ require (
 	github.com/aws/aws-sdk-go-v2/service/dynamodb v1.70.0
 	github.com/go-chi/chi/v5 v5.3.2
 	github.com/go-chi/cors v1.2.2
+	github.com/joho/godotenv v1.5.1
 	go.uber.org/zap v1.28.0
 )
 
