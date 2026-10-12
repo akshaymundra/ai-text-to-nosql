@@ -8,6 +8,12 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 - `client/`: planned frontend for configuring schemas and running queries (empty for now).
 - Repo-level Claude setup lives in `.claude/` (graph skills, hooks) and `.mcp.json` (code-review-graph server). Service-specific skills live in `server/.claude/skills/`.
 
+## Database changes: never by Claude
+
+- Claude never runs migrations (`make migrate-up`, `make migrate-down`, `goose up`, `down`, `redo`, `reset` or any other state-changing goose command) and never changes a database directly (no DDL or DML through `psql`, `docker exec`, scripts or app code).
+- Claude may write migration files (`make migrate-create`) and run read-only commands (`make migrate-status`, `goose validate`, `SELECT`); Akshay reviews and runs migrations.
+- Enforced by the `PreToolUse` hook `.claude/hooks/block-db-changes.sh`. Do not work around it.
+
 ## MCP Tools: code-review-graph
 
 **IMPORTANT: This project has a knowledge graph. ALWAYS use the
