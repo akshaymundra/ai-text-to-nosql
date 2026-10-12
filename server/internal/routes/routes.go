@@ -9,6 +9,7 @@ import (
 	"github.com/go-chi/cors"
 	"go.uber.org/zap"
 
+	appmiddleware "github.com/akshaymundra/ai-text-to-nosql/internal/middleware"
 	"github.com/akshaymundra/ai-text-to-nosql/internal/utils"
 )
 
@@ -39,13 +40,20 @@ func NewRoutes(logger *zap.Logger) http.Handler {
 		json.NewEncoder(w).Encode(map[string]string{"status": "ready"})
 	})
 
-	r.Group(registerRoutes())
+	r.Route("/api/v1", registerRoutes(logger))
 
 	return r
 }
 
-func registerRoutes() func(router chi.Router) {
+func registerRoutes(logger *zap.Logger) func(router chi.Router) {
 	return func(r chi.Router) {
-		r.Route("/api/v1/query", QueryRoutes())
+		r.Route("/auth", AuthRoutes(logger))
+
+		r.Group(func(r chi.Router) {
+			r.Use(appmiddleware.Authenticate)
+			r.Route("/workspace", WorkspaceRoutes(logger))
+			r.Route("/schemas", TableSchemaRoutes(logger))
+			r.Route("/queries", QueryRoutes(logger))
+		})
 	}
 }

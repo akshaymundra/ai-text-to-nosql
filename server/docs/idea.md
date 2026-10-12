@@ -145,7 +145,7 @@ DynamoDB QueryInput
 Expose a simple API:
 
 ```text
-POST /api/v1/query
+POST /api/v1/queries
 ```
 
 Request:
@@ -266,7 +266,7 @@ Reliability is measured with an **evaluation set**: 30-50 natural-language reque
 3. Evaluation set.
 4. pgvector retrieval over access-pattern chunks.
 5. LLM intent extraction with structured output, scored against the evaluation set.
-6. `POST /api/v1/query` and execution against DynamoDB Local.
+6. `POST /api/v1/queries` and execution against DynamoDB Local.
 7. Human-readable explanations built from the validator's structured reasons.
 
 ---

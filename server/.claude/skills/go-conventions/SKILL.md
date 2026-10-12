@@ -27,7 +27,7 @@ Project rules beat community Go advice. "Clear is better than clever": minimal s
 | External integrations | `internal/integrations/<name>/` | e.g. `integrations/ollama`. Thin typed wrapper over the external API; no pipeline logic. |
 | Errors and codes | `internal/apperror/`, `internal/constants/` | See section 2. |
 | Config | `internal/config/` | See section 4. |
-| Cross-cutting HTTP helpers | `internal/utils/` | `JSON`, `JSONError`, `RequestLogger`. Do not grow this into a junk drawer. |
+| Cross-cutting HTTP helpers | `internal/utils/` | `JSON`, `JSONError`, `WriteError`, `DecodeJSON`, `RequestLogger`. Do not grow this into a junk drawer. |
 | Middleware | `internal/middleware/` | chi middleware only. |
 
 Dependency direction: `routes → handler → service → (service/<stage>, repo, integrations) → dynamoschema/constants`. Stage packages import only other stage packages, `dynamoschema` and `constants`; never `service` itself, `repo`, `handler` or `integrations`. Nothing imports `cmd`.

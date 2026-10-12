@@ -35,3 +35,7 @@ func NotFound(msg string) *AppError {
 func Internal(msg string) *AppError {
 	return &AppError{Code: constants.ErrCodeInternalServerError, Message: msg, HTTPStatus: http.StatusInternalServerError}
 }
+
+func NotImplemented(msg string) *AppError {
+	return &AppError{Code: constants.ErrCodeNotImplemented, Message: msg, HTTPStatus: http.StatusNotImplemented}
+}

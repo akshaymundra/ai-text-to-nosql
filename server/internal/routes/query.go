@@ -1,16 +1,21 @@
 package routes
 
 import (
+	"github.com/go-chi/chi/v5"
+	"go.uber.org/zap"
+
 	"github.com/akshaymundra/ai-text-to-nosql/internal/handler"
 	"github.com/akshaymundra/ai-text-to-nosql/internal/service"
-
-	"github.com/go-chi/chi/v5"
 )
 
-func QueryRoutes() func(router chi.Router) {
+func QueryRoutes(logger *zap.Logger) func(router chi.Router) {
 	svc := service.NewQueryService()
-	h := handler.NewQueryHandler(svc)
+	h := handler.NewQueryHandler(svc, logger)
 	return func(r chi.Router) {
-		_ = h
+		r.Post("/", h.Create)
+		r.Get("/", h.List)
+		r.Get("/{queryID}", h.Get)
+		r.Post("/{queryID}/execute", h.Execute)
+		r.Get("/{queryID}/executions", h.ListExecutions)
 	}
 }

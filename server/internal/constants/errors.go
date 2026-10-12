@@ -10,4 +10,5 @@ const (
 	ErrCodeForbidden           QueryErrCode = "FORBIDDEN"
 	ErrCodeNotFound            QueryErrCode = "NOT_FOUND"
 	ErrCodeInternalServerError QueryErrCode = "INTERNAL_SERVER_ERROR"
+	ErrCodeNotImplemented      QueryErrCode = "NOT_IMPLEMENTED"
 )
