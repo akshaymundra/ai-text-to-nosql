@@ -8,9 +8,8 @@ import (
 	"github.com/akshaymundra/ai-text-to-nosql/internal/service"
 )
 
-func AuthRoutes(logger *zap.Logger) func(router chi.Router) {
-	svc := service.NewAuthService()
-	h := handler.NewAuthHandler(svc, logger)
+func AuthRoutes(authService *service.AuthService, logger *zap.Logger) func(router chi.Router) {
+	h := handler.NewAuthHandler(authService, logger)
 	return func(r chi.Router) {
 		r.Post("/register", h.Register)
 		r.Post("/login", h.Login)

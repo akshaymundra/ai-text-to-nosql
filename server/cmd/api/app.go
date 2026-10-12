@@ -33,7 +33,7 @@ func NewApp(ctx context.Context, cfg *config.Config) (*App, error) {
 		db:     db,
 	}
 
-	app.router = routes.NewRoutes(logger)
+	app.router = routes.NewRoutes(logger, db, cfg)
 
 	return app, nil
 }

@@ -1,9 +1,29 @@
 package service
 
-type AuthService struct{}
+import (
+	"context"
+	"time"
 
-func NewAuthService() *AuthService {
-	return &AuthService{}
+	"github.com/akshaymundra/ai-text-to-nosql/internal/model"
+)
+
+type workspaceStore interface {
+	Create(ctx context.Context, ws model.Workspace) (model.Workspace, error)
+	GetByName(ctx context.Context, name string) (model.Workspace, error)
+}
+
+type AuthService struct {
+	workspaces workspaceStore
+	jwtSecret  []byte
+	tokenTTL   time.Duration
+}
+
+func NewAuthService(workspaces workspaceStore, jwtSecret string, tokenTTL time.Duration) *AuthService {
+	return &AuthService{
+		workspaces: workspaces,
+		jwtSecret:  []byte(jwtSecret),
+		tokenTTL:   tokenTTL,
+	}
 }
 
 type WorkspaceService struct{}

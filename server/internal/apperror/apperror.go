@@ -32,6 +32,10 @@ func NotFound(msg string) *AppError {
 	return &AppError{Code: constants.ErrCodeNotFound, Message: msg, HTTPStatus: http.StatusNotFound}
 }
 
+func Conflict(msg string) *AppError {
+	return &AppError{Code: constants.ErrCodeConflict, Message: msg, HTTPStatus: http.StatusConflict}
+}
+
 func Internal(msg string) *AppError {
 	return &AppError{Code: constants.ErrCodeInternalServerError, Message: msg, HTTPStatus: http.StatusInternalServerError}
 }

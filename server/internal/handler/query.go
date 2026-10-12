@@ -16,6 +16,10 @@ func (h *QueryHandler) Create(w http.ResponseWriter, r *http.Request) {
 		utils.WriteError(w, r, h.Logger, err)
 		return
 	}
+	if err := req.Validate(); err != nil {
+		utils.WriteError(w, r, h.Logger, err)
+		return
+	}
 
 	query, err := h.QueryService.Create(r.Context(), middleware.WorkspaceID(r.Context()), req)
 	if err != nil {
@@ -49,6 +53,10 @@ func (h *QueryHandler) Get(w http.ResponseWriter, r *http.Request) {
 func (h *QueryHandler) Execute(w http.ResponseWriter, r *http.Request) {
 	var req types.ExecuteQueryRequest
 	if err := utils.DecodeJSON(r, &req); err != nil {
+		utils.WriteError(w, r, h.Logger, err)
+		return
+	}
+	if err := req.Validate(); err != nil {
 		utils.WriteError(w, r, h.Logger, err)
 		return
 	}

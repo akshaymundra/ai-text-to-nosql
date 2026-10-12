@@ -15,10 +15,13 @@ type Config struct {
 	AppEnv        string
 	DatabaseURL   string
 	DBPingTimeout time.Duration
+	JWTSecret     string
+	JWTTTL        time.Duration
 }
 
 var requiredEnvs = []string{
 	"DATABASE_URL",
+	"JWT_SECRET",
 }
 
 var (
@@ -34,6 +37,8 @@ func Init() {
 			AppEnv:        getEnv("APP_ENV", "development"),
 			DatabaseURL:   getEnv("DATABASE_URL", ""),
 			DBPingTimeout: getDurationEnv("DB_PING_TIMEOUT", 5*time.Second),
+			JWTSecret:     os.Getenv("JWT_SECRET"),
+			JWTTTL:        getDurationEnv("JWT_TTL", 24*time.Hour),
 		}
 	})
 }

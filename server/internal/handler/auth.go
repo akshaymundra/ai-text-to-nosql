@@ -13,6 +13,10 @@ func (h *AuthHandler) Register(w http.ResponseWriter, r *http.Request) {
 		utils.WriteError(w, r, h.Logger, err)
 		return
 	}
+	if err := req.Validate(); err != nil {
+		utils.WriteError(w, r, h.Logger, err)
+		return
+	}
 
 	token, err := h.AuthService.Register(r.Context(), req)
 	if err != nil {
@@ -26,6 +30,10 @@ func (h *AuthHandler) Register(w http.ResponseWriter, r *http.Request) {
 func (h *AuthHandler) Login(w http.ResponseWriter, r *http.Request) {
 	var req types.LoginRequest
 	if err := utils.DecodeJSON(r, &req); err != nil {
+		utils.WriteError(w, r, h.Logger, err)
+		return
+	}
+	if err := req.Validate(); err != nil {
 		utils.WriteError(w, r, h.Logger, err)
 		return
 	}

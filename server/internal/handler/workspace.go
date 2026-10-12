@@ -24,6 +24,10 @@ func (h *WorkspaceHandler) UpdateConnection(w http.ResponseWriter, r *http.Reque
 		utils.WriteError(w, r, h.Logger, err)
 		return
 	}
+	if err := req.Validate(); err != nil {
+		utils.WriteError(w, r, h.Logger, err)
+		return
+	}
 
 	workspace, err := h.WorkspaceService.UpdateConnection(r.Context(), middleware.WorkspaceID(r.Context()), req)
 	if err != nil {

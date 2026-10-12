@@ -7,13 +7,17 @@ import (
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
 	"github.com/go-chi/cors"
+	"github.com/jackc/pgx/v5/pgxpool"
 	"go.uber.org/zap"
 
+	"github.com/akshaymundra/ai-text-to-nosql/internal/config"
 	appmiddleware "github.com/akshaymundra/ai-text-to-nosql/internal/middleware"
+	"github.com/akshaymundra/ai-text-to-nosql/internal/repo"
+	"github.com/akshaymundra/ai-text-to-nosql/internal/service"
 	"github.com/akshaymundra/ai-text-to-nosql/internal/utils"
 )
 
-func NewRoutes(logger *zap.Logger) http.Handler {
+func NewRoutes(logger *zap.Logger, db *pgxpool.Pool, cfg *config.Config) http.Handler {
 	r := chi.NewRouter()
 
 	r.Use(middleware.Recoverer)
@@ -40,17 +44,19 @@ func NewRoutes(logger *zap.Logger) http.Handler {
 		json.NewEncoder(w).Encode(map[string]string{"status": "ready"})
 	})
 
-	r.Route("/api/v1", registerRoutes(logger))
+	r.Route("/api/v1", registerRoutes(logger, db, cfg))
 
 	return r
 }
 
-func registerRoutes(logger *zap.Logger) func(router chi.Router) {
+func registerRoutes(logger *zap.Logger, db *pgxpool.Pool, cfg *config.Config) func(router chi.Router) {
+	authService := service.NewAuthService(repo.NewWorkspaceRepo(db), cfg.JWTSecret, cfg.JWTTTL)
+
 	return func(r chi.Router) {
-		r.Route("/auth", AuthRoutes(logger))
+		r.Route("/auth", AuthRoutes(authService, logger))
 
 		r.Group(func(r chi.Router) {
-			r.Use(appmiddleware.Authenticate)
+			r.Use(appmiddleware.Authenticate(authService, logger))
 			r.Route("/workspace", WorkspaceRoutes(logger))
 			r.Route("/schemas", TableSchemaRoutes(logger))
 			r.Route("/queries", QueryRoutes(logger))

@@ -40,6 +40,10 @@ func (h *TableSchemaHandler) Put(w http.ResponseWriter, r *http.Request) {
 		utils.WriteError(w, r, h.Logger, err)
 		return
 	}
+	if err := req.Validate(); err != nil {
+		utils.WriteError(w, r, h.Logger, err)
+		return
+	}
 
 	schema, err := h.TableSchemaService.Put(
 		r.Context(),

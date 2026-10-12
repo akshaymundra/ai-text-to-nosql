@@ -20,7 +20,7 @@ Project rules beat community Go advice. "Clear is better than clever": minimal s
 | Business logic | `internal/service/<feature>.go` | Methods on the service struct declared in `service/init.go`. Orchestrates pipeline stages, repos and integrations. |
 | Persistence / external stores | `internal/repo/` | Queries only: DynamoDB execution, Postgres registry and pgvector queries. Receives its client (e.g. `*pgxpool.Pool`) via constructor; never opens connections. Returns domain types, not driver types. |
 | Request/response DTOs | `internal/types/` | JSON-tagged structs for the HTTP API. |
-| HTTP input validation | `internal/validations/` | Validates request payloads only. **Not** the DynamoDB query validator. |
+| HTTP input validation | `internal/types/` | `validate:"..."` tags (go-playground/validator) on each request struct plus a `Validate() error` method that calls `validateStruct`; handlers call `req.Validate()` right after `utils.DecodeJSON`. Custom tags are registered in `types/validate.go`. Payload checks only; **not** the DynamoDB query validator. |
 | Persistence models | `internal/model/` | Structs mapped to Postgres rows. |
 | Pipeline stages | `internal/service/<stage>/` | Subpackages of `service`: `ir`, `planner`, `validator`, `compiler` (later `retrieval`, `extraction`). Pure packages: input in, result out, tables passed as a parameter, no I/O, no globals, no logging. Only `service` (e.g. `QueryService`) wires them together. |
 | DynamoDB table definitions | `internal/dynamoschema/` | `dynamoschema.Table` (a customer table: keys, GSIs, attributes, access patterns) and loaders. Domain type shared by pipeline stages, `model` and `types`; never move it into either. |
