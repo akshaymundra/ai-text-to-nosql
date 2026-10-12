@@ -10,12 +10,10 @@ block() {
 cmd=$(jq -er '.tool_input.command') || block 'could not read the Bash command'
 flat=$(printf '%s' "$cmd" | tr '\n' ';')
 
-# goose and make only count where a command starts, so the words inside commit messages or strings do not trigger.
-start='(^|[;&|(`])[[:space:]]*([A-Za-z_][A-Za-z0-9_]*=[^[:space:]]*[[:space:]]+)*'
-args='([[:space:]]+[^;&|]*)?[[:space:]]'
-end='([[:space:]]|[;&|)]|$)'
-goose="${start}(go[[:space:]]+tool[[:space:]]+)?([^[:space:];&|]*/)?goose${args}(up|up-by-one|up-to|down|down-to|redo|reset)${end}"
-make="${start}make${args}migrate-(up|down)${end}"
+# Matched anywhere, so wrappers (bash -c, env, sudo, xargs, docker exec, go run) cannot hide them.
+# Text that merely mentions them (e.g. a commit message) is blocked too; commit with -F <file> instead.
+goose='(^|[^a-z0-9_])goose([^a-z0-9_].*)?[[:space:]](up|up-by-one|up-to|down|down-to|redo|reset)([^a-z0-9_-]|$)'
+make='(^|[^a-z0-9_])make([^a-z0-9_].*)?[[:space:]]migrate-(up|down)([^a-z0-9_-]|$)'
 
 # psql SQL often arrives through pipes, heredocs or quotes, so match the client and a write keyword anywhere.
 psql='(^|[^a-z0-9_])(psql|pgcli)([^a-z0-9_]|$)'
