@@ -28,7 +28,7 @@ erDiagram
         uuid id PK "uuidv7()"
         uuid workspace_id FK "ON DELETE CASCADE; UK with table_name"
         text table_name "UK with workspace_id"
-        jsonb definition "full schema.Table"
+        jsonb definition "full dynamoschema.Table"
         text content_hash "sha256 of definition"
         timestamptz created_at
         timestamptz updated_at

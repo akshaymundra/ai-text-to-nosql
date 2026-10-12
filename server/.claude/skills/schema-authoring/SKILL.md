@@ -5,7 +5,7 @@ description: How to write or change a table schema JSON file (server/schemas-loc
 
 # Schema authoring
 
-One file per table in `server/schemas-local/`. Loaded by `internal/schema.LoadDir`, seeded by `make seed`, and (later) embedded for retrieval. The JSON shape is the `schema.Table` struct; check it before adding fields.
+One file per table in `server/schemas-local/`. Loaded by `internal/dynamoschema.LoadDir`, seeded by `make seed`, and (later) embedded for retrieval. The JSON shape is the `dynamoschema.Table` struct; check it before adding fields.
 
 ## Contract
 
@@ -32,7 +32,7 @@ One file per table in `server/schemas-local/`. Loaded by `internal/schema.LoadDi
 
 **Keys and indexes**
 - Every key attribute (table and index PK/SK) must be listed in `attributes` with type `string` or `number`; the seeder rejects anything else.
-- One partition key and at most one sort key per index. DynamoDB now supports multi-attribute GSI keys, but `schema.Table` does not model them; do not add one.
+- One partition key and at most one sort key per index. DynamoDB now supports multi-attribute GSI keys, but `dynamoschema.Table` does not model them; do not add one.
 - Table/index names: 3 to 255 chars, `a-z A-Z 0-9 _ - .`.
 - GSIs are created with projection `ALL`, so every attribute is queryable through any index. If projections change later, the schema must state them, because a GSI cannot return non-projected attributes.
 

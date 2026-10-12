@@ -1,4 +1,4 @@
-package schema
+package dynamoschema
 
 import (
 	"encoding/json"

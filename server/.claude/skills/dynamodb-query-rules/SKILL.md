@@ -76,7 +76,7 @@ Source: [GSI](https://docs.aws.amazon.com/amazondynamodb/latest/developerguide/G
 - **Sparse:** items missing an index key attribute are not in the index. A GSI query can return fewer items than the base table holds.
 - **Eventually consistent only.** Fresh writes may be missing.
 - Projection `KEYS_ONLY` / `INCLUDE` / `ALL`: a GSI query **cannot fetch non-projected attributes** from the base table. If a filter or projection needs an attribute the index does not project, that index cannot serve the request.
-- **Multi-attribute keys (new):** a GSI can have up to 4 partition-key and 4 sort-key attributes. Query must give `=` on all partition attributes; sort attributes left to right with no gaps; an inequality (`< > BETWEEN begins_with`) only on the last one used. `internal/schema` models a single PK/SK today: reject or flag such indexes until the schema model supports them.
+- **Multi-attribute keys (new):** a GSI can have up to 4 partition-key and 4 sort-key attributes. Query must give `=` on all partition attributes; sort attributes left to right with no gaps; an inequality (`< > BETWEEN begins_with`) only on the last one used. `internal/dynamoschema` models a single PK/SK today: reject or flag such indexes until the schema model supports them.
 - Default quota: 20 GSIs per table.
 
 ## 7. Types, ordering, limits

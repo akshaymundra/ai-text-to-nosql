@@ -17,7 +17,7 @@ import (
 	"github.com/aws/aws-sdk-go-v2/service/dynamodb/types"
 	"github.com/joho/godotenv"
 
-	"github.com/akshaymundra/ai-text-to-nosql/internal/schema"
+	"github.com/akshaymundra/ai-text-to-nosql/internal/dynamoschema"
 )
 
 const (
@@ -41,7 +41,7 @@ func main() {
 	ctx := context.Background()
 	_ = godotenv.Load()
 
-	tables, err := schema.LoadDir("schemas-local")
+	tables, err := dynamoschema.LoadDir("schemas-local")
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -95,7 +95,7 @@ func requireLocal(endpoint string) error {
 	return nil
 }
 
-func recreateTable(ctx context.Context, client *dynamodb.Client, t schema.Table) error {
+func recreateTable(ctx context.Context, client *dynamodb.Client, t dynamoschema.Table) error {
 	_, err := client.DeleteTable(ctx, &dynamodb.DeleteTableInput{TableName: aws.String(t.Name)})
 	var notFound *types.ResourceNotFoundException
 	switch {
@@ -120,7 +120,7 @@ func recreateTable(ctx context.Context, client *dynamodb.Client, t schema.Table)
 	return waiter.Wait(ctx, &dynamodb.DescribeTableInput{TableName: aws.String(t.Name)}, waitTimeout)
 }
 
-func createTableInput(t schema.Table) (*dynamodb.CreateTableInput, error) {
+func createTableInput(t dynamoschema.Table) (*dynamodb.CreateTableInput, error) {
 	definitions, err := attributeDefinitions(t)
 	if err != nil {
 		return nil, err
@@ -151,7 +151,7 @@ func keySchema(partitionKey, sortKey string) []types.KeySchemaElement {
 }
 
 // DynamoDB rejects definitions for attributes that are not part of any key, so only key attributes are declared.
-func attributeDefinitions(t schema.Table) ([]types.AttributeDefinition, error) {
+func attributeDefinitions(t dynamoschema.Table) ([]types.AttributeDefinition, error) {
 	keyNames := []string{t.PartitionKey, t.SortKey}
 	for _, idx := range t.Indexes {
 		keyNames = append(keyNames, idx.PartitionKey, idx.SortKey)
@@ -178,7 +178,7 @@ func attributeDefinitions(t schema.Table) ([]types.AttributeDefinition, error) {
 	return definitions, nil
 }
 
-func insertRecords(ctx context.Context, client *dynamodb.Client, t schema.Table) error {
+func insertRecords(ctx context.Context, client *dynamodb.Client, t dynamoschema.Table) error {
 	for start := 0; start < len(t.ExampleRecords); start += batchSize {
 		end := min(start+batchSize, len(t.ExampleRecords))
 
