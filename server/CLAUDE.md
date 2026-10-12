@@ -16,7 +16,7 @@ Build order from `docs/idea.md`: planner/validator/compiler are pure code, built
 
 ## Pipeline invariants
 
-- Planner, validator and compiler are pure functions that take the tables as a parameter (`Plan(ir, tables)`), never call `schema.LoadDir` or read globals. Schemas will later come from a per-workspace registry.
+- Planner, validator and compiler are pure functions that take the tables as a parameter (`Plan(ir, tables)`), never call `dynamoschema.LoadDir` or read globals. Schemas will later come from a per-workspace registry.
 - The IR never names an index. Only the planner sets `IndexName`.
 - Rejections carry a structured code from `internal/constants` plus the offending field; human-readable explanations are built from those codes.
 - Compiler output is deterministic: every attribute name and value is aliased (`#n0`, `:v0`, ... in condition order), so eval cases compare exactly.
@@ -54,7 +54,7 @@ Migration targets read `DATABASE_URL` from `.env` via Make's `-include`, so a `$
 
 ## Architecture
 
-- `schemas-local/*.json`: source of truth for tables. Each file defines table, PK/SK, attributes (with types and descriptions), GSIs, `accessPatterns` and `exampleRecords`. Loaded by `internal/schema.LoadDir`. Adding a table = adding a JSON file; seed and (later) retrieval pick it up automatically. Key attributes must be `string` or `number` (only those map to DynamoDB scalar types in `cmd/seed-local`).
+- `schemas-local/*.json`: source of truth for tables. Each file defines table, PK/SK, attributes (with types and descriptions), GSIs, `accessPatterns` and `exampleRecords`. Loaded by `internal/dynamoschema.LoadDir`. Adding a table = adding a JSON file; seed and (later) retrieval pick it up automatically. Key attributes must be `string` or `number` (only those map to DynamoDB scalar types in `cmd/seed-local`).
 - `cmd/api`: entrypoint. `App` wires config, zap logger, Postgres pool (pgx v5, `DATABASE_URL` required, pinged at startup) and chi router; graceful shutdown on SIGINT/SIGTERM closes the pool. Repos get the pool by injection and hold queries only.
 - `migrations/`: goose SQL migrations for the Postgres app tables, named `<UTC timestamp>_<snake_name>.sql` (goose reads the version up to the first `_`). ERD and design notes in `docs/erd.md`. Create one file at a time: goose timestamps have 1s resolution, so two creates in the same second collide.
 - `cmd/seed-local`: standalone DynamoDB Local seeder, uses static `local` credentials, loads `.env` itself, and refuses any endpoint whose host is not localhost/127.0.0.1/::1.
@@ -63,7 +63,8 @@ Migration targets read `DATABASE_URL` from `.env` via Make's `-include`, so a `$
 - `internal/config`: `sync.Once` singleton from env vars; call `config.Init()` before `GetInstance()`. `Init` loads `.env` via godotenv (missing file ignored, real env vars win). `.env.sample` lists app keys only; `DYNAMODB_ENDPOINT` is seed-only.
 - `internal/apperror` + `internal/constants`: typed `AppError` with code and HTTP status; error codes live in `constants/errors.go`.
 - `internal/utils/response.go`: `JSON` / `JSONError` wrap payloads as `{"data": ...}` / `{"error": ...}`.
-- Empty placeholder dirs (`model`, `repo`, `types`, `validations`, `middleware`, `routes/s2s`) mark where those concerns go. Pipeline stages go in `internal/service/<stage>/` (pure subpackages, wired by `QueryService`), external API wrappers in `internal/integrations/<name>/`. The full placement table is in the `go-conventions` skill; do not invent other packages.
+- `internal/model`: one file per Postgres table, structs with `db` tags matching `migrations/` (for `pgx.RowToStructByName`). Nullable columns are pointers or nil-able `json.RawMessage`; `jsonb` columns scan into typed fields (`dynamoschema.Table`, `[]string`). Column enums (`ConnectionType`, `QueryStatus`) live next to their model. A migration that changes a table must update its model.
+- Empty placeholder dirs (`repo`, `types`, `validations`, `middleware`, `routes/s2s`) mark where those concerns go. Pipeline stages go in `internal/service/<stage>/` (pure subpackages, wired by `QueryService`), external API wrappers in `internal/integrations/<name>/`. The full placement table is in the `go-conventions` skill; do not invent other packages.
 
 ## Project skills and hooks
 
