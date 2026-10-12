@@ -42,8 +42,13 @@ make build    # bin/api
 make test     # go test -race ./...
 make lint     # golangci-lint run ./...
 make seed     # go run ./cmd/seed-local
+make migrate-create name=<snake_case_name>   # new goose migration in migrations/
+make migrate-status                          # read-only
+make migrate-up / make migrate-down          # Akshay only, never Claude
 go test -race -run TestName ./internal/<pkg>   # single test
 ```
+
+Migration targets read `DATABASE_URL` from `.env` via Make's `-include`, so a `$` or `#` in the URL must be escaped (`$$`, `\#`). Goose runs as a pinned tool (`go tool goose`, v3.27.0, the last release supporting Go 1.25).
 
 `make seed` needs DynamoDB Local (default `http://localhost:8081`, override with `DYNAMODB_ENDPOINT`). It **drops and recreates** every table in `schemas-local/`, then batch-inserts `exampleRecords`. Must run from `server/` (reads `schemas-local/` relatively).
 
@@ -51,6 +56,7 @@ go test -race -run TestName ./internal/<pkg>   # single test
 
 - `schemas-local/*.json`: source of truth for tables. Each file defines table, PK/SK, attributes (with types and descriptions), GSIs, `accessPatterns` and `exampleRecords`. Loaded by `internal/schema.LoadDir`. Adding a table = adding a JSON file; seed and (later) retrieval pick it up automatically. Key attributes must be `string` or `number` (only those map to DynamoDB scalar types in `cmd/seed-local`).
 - `cmd/api`: entrypoint. `App` wires config, zap logger, Postgres pool (pgx v5, `DATABASE_URL` required, pinged at startup) and chi router; graceful shutdown on SIGINT/SIGTERM closes the pool. Repos get the pool by injection and hold queries only.
+- `migrations/`: goose SQL migrations for the Postgres app tables, named `<UTC timestamp>_<snake_name>.sql` (goose reads the version up to the first `_`). ERD and design notes in `docs/erd.md`. Create one file at a time: goose timestamps have 1s resolution, so two creates in the same second collide.
 - `cmd/seed-local`: standalone DynamoDB Local seeder, uses static `local` credentials, loads `.env` itself, and refuses any endpoint whose host is not localhost/127.0.0.1/::1.
 - `internal/routes`: `routes.go` sets global middleware (Recoverer, RequestID, request logger, CORS), `/health`, `/ready`, and mounts feature route groups in `registerRoutes`. Each feature gets its own file (e.g. `query.go`) that constructs service → handler and returns a `func(chi.Router)`.
 - Layering: routes → `handler` → `service` → `repo`. Currently `QueryService`/`QueryHandler` are empty stubs and `/api/v1/query` has no endpoints.

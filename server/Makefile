@@ -1,7 +1,11 @@
+-include .env
+
 SERVICE=api
 BINARY=bin/$(SERVICE)
+MIGRATIONS_DIR=migrations
+GOOSE=go tool goose -dir $(MIGRATIONS_DIR) postgres "$(DATABASE_URL)"
 
-.PHONY: build run test lint clean seed
+.PHONY: build run test lint clean seed migrate-create migrate-up migrate-down migrate-status
 
 build:
 	go build -o $(BINARY) ./cmd/$(SERVICE)
@@ -20,3 +24,16 @@ clean:
 
 seed:
 	go run ./cmd/seed-local
+
+migrate-create:
+	$(if $(name),,$(error usage: make migrate-create name=<snake_case_name>))
+	go tool goose -dir $(MIGRATIONS_DIR) create $(name) sql
+
+migrate-up:
+	$(GOOSE) up
+
+migrate-down:
+	$(GOOSE) down
+
+migrate-status:
+	$(GOOSE) status
