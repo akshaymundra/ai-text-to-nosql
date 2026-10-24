@@ -12,4 +12,9 @@ const (
 	RejectCodeInvalidValue         RejectionCode = "INVALID_VALUE"
 	RejectCodeTooManyValues        RejectionCode = "TOO_MANY_VALUES"
 	RejectCodeValueTypeMismatch    RejectionCode = "VALUE_TYPE_MISMATCH"
+
+	RejectCodeScanRequired          RejectionCode = "SCAN_REQUIRED"
+	RejectCodeInvalidKeyCondition   RejectionCode = "INVALID_KEY_CONDITION"
+	RejectCodeMultipleKeyConditions RejectionCode = "MULTIPLE_KEY_CONDITIONS"
+	RejectCodeEmptyKeyValue         RejectionCode = "EMPTY_KEY_VALUE"
 )
