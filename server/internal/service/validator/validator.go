@@ -48,7 +48,7 @@ func checkCondition(c ir.Condition, table dynamoschema.Table) (constants.Rejecti
 		return constants.RejectCodeInvalidValue, false
 	}
 
-	values := valuesOf(c.Value)
+	values := c.Values()
 	if len(values) > maxInValues {
 		return constants.RejectCodeTooManyValues, false
 	}
@@ -56,6 +56,9 @@ func checkCondition(c ir.Condition, table dynamoschema.Table) (constants.Rejecti
 		if !matchesType(v, attr.Type) {
 			return constants.RejectCodeValueTypeMismatch, false
 		}
+	}
+	if c.Operator == ir.OpBetween && !inOrder(values[0], values[1]) {
+		return constants.RejectCodeInvalidRange, false
 	}
 	return "", true
 }
@@ -76,14 +79,15 @@ func arityMatches(value any, arity ir.Arity) bool {
 	}
 }
 
-func valuesOf(value any) []any {
-	switch v := value.(type) {
-	case nil:
-		return nil
-	case []any:
-		return v
+// Both bounds already match the attribute type. Go compares strings bytewise, the same UTF-8 order DynamoDB uses.
+func inOrder(low, high any) bool {
+	switch low := low.(type) {
+	case string:
+		return low <= high.(string)
+	case float64:
+		return low <= high.(float64)
 	default:
-		return []any{v}
+		return false
 	}
 }
 

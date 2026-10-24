@@ -162,6 +162,24 @@ func TestValidate(t *testing.T) {
 			want:      []ir.Rejection{{Code: constants.RejectCodeValueTypeMismatch, Field: "login_count"}},
 		},
 		{
+			name:      "between with equal bounds",
+			query:     usersQuery(ir.Condition{Field: "login_count", Operator: ir.OpBetween, Value: []any{float64(3), float64(3)}}),
+			wantTable: "users",
+			want:      []ir.Rejection{},
+		},
+		{
+			name:      "between with string bounds reversed",
+			query:     usersQuery(ir.Condition{Field: "created_at", Operator: ir.OpBetween, Value: []any{"2026-09-30", "2026-09-01"}}),
+			wantTable: "users",
+			want:      []ir.Rejection{{Code: constants.RejectCodeInvalidRange, Field: "created_at"}},
+		},
+		{
+			name:      "between with number bounds reversed",
+			query:     usersQuery(ir.Condition{Field: "login_count", Operator: ir.OpBetween, Value: []any{float64(9), float64(1)}}),
+			wantTable: "users",
+			want:      []ir.Rejection{{Code: constants.RejectCodeInvalidRange, Field: "login_count"}},
+		},
+		{
 			name: "one rejection per bad condition, in condition order",
 			query: usersQuery(
 				ir.Condition{Field: "email", Operator: ir.OpEq, Value: "a@b.c"},

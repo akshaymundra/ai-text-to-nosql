@@ -110,18 +110,10 @@ func checkKeyCondition(c ir.Condition, alreadySet, allowed bool) (constants.Reje
 	if !allowed {
 		return constants.RejectCodeInvalidKeyCondition, false
 	}
-	if hasEmptyString(c.Value) {
+	if slices.Contains(c.Values(), any("")) {
 		return constants.RejectCodeEmptyKeyValue, false
 	}
 	return "", true
-}
-
-func hasEmptyString(value any) bool {
-	values, ok := value.([]any)
-	if !ok {
-		values = []any{value}
-	}
-	return slices.Contains(values, any(""))
 }
 
 func pickBest(paths []AccessPath) AccessPath {

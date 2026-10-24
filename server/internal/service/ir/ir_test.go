@@ -69,3 +69,24 @@ func TestOperatorRule(t *testing.T) {
 		})
 	}
 }
+
+func TestConditionValues(t *testing.T) {
+	tests := []struct {
+		name  string
+		value any
+		want  []any
+	}{
+		{name: "no value", value: nil, want: nil},
+		{name: "scalar", value: "acme", want: []any{"acme"}},
+		{name: "list", value: []any{"a", "b"}, want: []any{"a", "b"}},
+	}
+
+	for _, tc := range tests {
+		t.Run(tc.name, func(t *testing.T) {
+			got := Condition{Field: "f", Operator: OpEq, Value: tc.value}.Values()
+			if diff := cmp.Diff(tc.want, got); diff != "" {
+				t.Errorf("values mismatch (-want +got):\n%s", diff)
+			}
+		})
+	}
+}

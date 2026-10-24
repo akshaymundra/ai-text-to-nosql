@@ -67,6 +67,17 @@ type Condition struct {
 	Value    any      `json:"value,omitempty"`
 }
 
+func (c Condition) Values() []any {
+	switch v := c.Value.(type) {
+	case nil:
+		return nil
+	case []any:
+		return v
+	default:
+		return []any{v}
+	}
+}
+
 type Rejection struct {
 	Code  constants.RejectionCode `json:"code"`
 	Field string                  `json:"field,omitempty"`
