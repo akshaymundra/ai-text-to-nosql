@@ -33,7 +33,7 @@ func (s *singleWorkspaceStore) GetByName(ctx context.Context, name string) (mode
 }
 
 func TestAuthenticate(t *testing.T) {
-	authSvc := service.NewAuthService(&singleWorkspaceStore{}, "test-secret-at-least-32-bytes-long!!", time.Hour)
+	authSvc := service.NewAuthService(&singleWorkspaceStore{}, "test-secret-at-least-32-bytes-long!!", time.Hour, false)
 	token, err := authSvc.Register(context.Background(), types.RegisterRequest{
 		Name:           "acme",
 		Password:       "correct-horse",

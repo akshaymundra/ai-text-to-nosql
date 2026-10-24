@@ -20,6 +20,10 @@ import (
 var dummyPasswordHash = []byte("$2a$10$66hH8GMnMBLMFlJR1i7Ym.TXZfRk6kCWTnojXpa9kqTDvaWCWaDOa")
 
 func (s *AuthService) Register(ctx context.Context, req types.RegisterRequest) (types.TokenResponse, error) {
+	if err := checkConnectionType(req.ConnectionType, s.allowLocalConnection); err != nil {
+		return types.TokenResponse{}, err
+	}
+
 	hash, err := bcrypt.GenerateFromPassword([]byte(req.Password), bcrypt.DefaultCost)
 	if err != nil {
 		return types.TokenResponse{}, fmt.Errorf("hashing password: %w", err)

@@ -19,6 +19,8 @@ type Config struct {
 	JWTTTL        time.Duration
 }
 
+const EnvDevelopment = "development"
+
 var requiredEnvs = []string{
 	"DATABASE_URL",
 	"JWT_SECRET",
@@ -34,7 +36,7 @@ func Init() {
 		_ = godotenv.Load()
 		instance = &Config{
 			ServerPort:    getEnv("SERVER_PORT", "3000"),
-			AppEnv:        getEnv("APP_ENV", "development"),
+			AppEnv:        getEnv("APP_ENV", EnvDevelopment),
 			DatabaseURL:   getEnv("DATABASE_URL", ""),
 			DBPingTimeout: getDurationEnv("DB_PING_TIMEOUT", 5*time.Second),
 			JWTSecret:     os.Getenv("JWT_SECRET"),

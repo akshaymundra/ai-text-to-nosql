@@ -63,6 +63,36 @@ func TestRegister(t *testing.T) {
 			},
 			wantErr: true,
 		},
+		{
+			name: "local with loopback IPv4 endpoint",
+			mutate: func(r *RegisterRequest) {
+				r.ConnectionType = model.ConnectionTypeLocal
+				r.EndpointURL = strPtr("http://127.0.0.1:8081")
+			},
+		},
+		{
+			name: "local with loopback IPv6 endpoint",
+			mutate: func(r *RegisterRequest) {
+				r.ConnectionType = model.ConnectionTypeLocal
+				r.EndpointURL = strPtr("http://[::1]:8081")
+			},
+		},
+		{
+			name: "local with cloud metadata endpoint",
+			mutate: func(r *RegisterRequest) {
+				r.ConnectionType = model.ConnectionTypeLocal
+				r.EndpointURL = strPtr("http://169.254.169.254/latest/meta-data")
+			},
+			wantErr: true,
+		},
+		{
+			name: "local with host that only starts with localhost",
+			mutate: func(r *RegisterRequest) {
+				r.ConnectionType = model.ConnectionTypeLocal
+				r.EndpointURL = strPtr("http://localhost.evil.com:8081")
+			},
+			wantErr: true,
+		},
 		{name: "unknown connection type", mutate: func(r *RegisterRequest) { r.ConnectionType = "ssh" }, wantErr: true},
 		{name: "missing region", mutate: func(r *RegisterRequest) { r.AWSRegion = "" }, wantErr: true},
 		{
@@ -155,6 +185,15 @@ func TestUpdateConnection(t *testing.T) {
 				ConnectionType: model.ConnectionTypeTemporaryCredentials,
 				AWSRegion:      "ap-south-1",
 				AWSCredentials: &AWSCredentials{AccessKeyID: "ASIA", SecretAccessKey: "s", Expiration: time.Now()},
+			},
+			wantErr: true,
+		},
+		{
+			name: "local with remote endpoint",
+			req: UpdateConnectionRequest{
+				ConnectionType: model.ConnectionTypeLocal,
+				AWSRegion:      "us-east-1",
+				EndpointURL:    strPtr("http://10.0.0.5:8081"),
 			},
 			wantErr: true,
 		},

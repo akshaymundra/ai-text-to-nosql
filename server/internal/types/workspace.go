@@ -9,7 +9,7 @@ import (
 type UpdateConnectionRequest struct {
 	ConnectionType model.ConnectionType `json:"connection_type"           validate:"required,oneof=temporary_credentials local"`
 	AWSRegion      string               `json:"aws_region"                validate:"required"`
-	EndpointURL    *string              `json:"endpoint_url,omitempty"    validate:"required_if=ConnectionType local,excluded_if=ConnectionType temporary_credentials,omitnil,url"`
+	EndpointURL    *string              `json:"endpoint_url,omitempty"    validate:"required_if=ConnectionType local,excluded_if=ConnectionType temporary_credentials,omitnil,url,local_url"`
 	AWSCredentials *AWSCredentials      `json:"aws_credentials,omitempty" validate:"required_if=ConnectionType temporary_credentials,excluded_if=ConnectionType local"`
 }
 

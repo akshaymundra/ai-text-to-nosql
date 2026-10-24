@@ -8,8 +8,8 @@ import (
 	"github.com/akshaymundra/ai-text-to-nosql/internal/service"
 )
 
-func WorkspaceRoutes(logger *zap.Logger) func(router chi.Router) {
-	svc := service.NewWorkspaceService()
+func WorkspaceRoutes(logger *zap.Logger, allowLocalConnection bool) func(router chi.Router) {
+	svc := service.NewWorkspaceService(allowLocalConnection)
 	h := handler.NewWorkspaceHandler(svc, logger)
 	return func(r chi.Router) {
 		r.Get("/", h.Get)

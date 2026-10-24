@@ -58,7 +58,7 @@ func registerRequest(name, password string) types.RegisterRequest {
 
 func TestRegister(t *testing.T) {
 	store := newFakeWorkspaceStore()
-	svc := NewAuthService(store, testSecret, time.Hour)
+	svc := NewAuthService(store, testSecret, time.Hour, false)
 
 	resp, err := svc.Register(context.Background(), registerRequest("Acme", "correct-horse"))
 	if err != nil {
@@ -116,7 +116,7 @@ func TestRegisterErrors(t *testing.T) {
 	for _, tc := range tests {
 		t.Run(tc.name, func(t *testing.T) {
 			store := newFakeWorkspaceStore()
-			svc := NewAuthService(store, testSecret, time.Hour)
+			svc := NewAuthService(store, testSecret, time.Hour, false)
 			tc.setup(store, svc)
 
 			_, err := svc.Register(context.Background(), registerRequest("ACME", "correct-horse"))
@@ -131,9 +131,29 @@ func TestRegisterErrors(t *testing.T) {
 	}
 }
 
+func TestRegisterLocalConnection(t *testing.T) {
+	req := registerRequest("acme", "correct-horse")
+	req.ConnectionType = model.ConnectionTypeLocal
+	endpoint := "http://localhost:8081"
+	req.EndpointURL = &endpoint
+
+	t.Run("rejected outside development", func(t *testing.T) {
+		svc := NewAuthService(newFakeWorkspaceStore(), testSecret, time.Hour, false)
+		_, err := svc.Register(context.Background(), req)
+		assertAppErrorCode(t, err, constants.ErrCodeBadRequest)
+	})
+
+	t.Run("allowed in development", func(t *testing.T) {
+		svc := NewAuthService(newFakeWorkspaceStore(), testSecret, time.Hour, true)
+		if _, err := svc.Register(context.Background(), req); err != nil {
+			t.Fatalf("register: %v", err)
+		}
+	})
+}
+
 func TestLogin(t *testing.T) {
 	store := newFakeWorkspaceStore()
-	svc := NewAuthService(store, testSecret, time.Hour)
+	svc := NewAuthService(store, testSecret, time.Hour, false)
 	if _, err := svc.Register(context.Background(), registerRequest("acme", "correct-horse")); err != nil {
 		t.Fatalf("seed register: %v", err)
 	}
@@ -175,13 +195,13 @@ func TestLogin(t *testing.T) {
 }
 
 func TestVerifyTokenRejects(t *testing.T) {
-	svc := NewAuthService(newFakeWorkspaceStore(), testSecret, time.Hour)
+	svc := NewAuthService(newFakeWorkspaceStore(), testSecret, time.Hour, false)
 
-	expired, err := NewAuthService(newFakeWorkspaceStore(), testSecret, -time.Minute).issueToken("ws-acme")
+	expired, err := NewAuthService(newFakeWorkspaceStore(), testSecret, -time.Minute, false).issueToken("ws-acme")
 	if err != nil {
 		t.Fatalf("issue expired token: %v", err)
 	}
-	otherSecret, err := NewAuthService(newFakeWorkspaceStore(), "another-secret-also-32-bytes-long!", time.Hour).
+	otherSecret, err := NewAuthService(newFakeWorkspaceStore(), "another-secret-also-32-bytes-long!", time.Hour, false).
 		issueToken("ws-acme")
 	if err != nil {
 		t.Fatalf("issue token with other secret: %v", err)

@@ -13,23 +13,32 @@ type workspaceStore interface {
 }
 
 type AuthService struct {
-	workspaces workspaceStore
-	jwtSecret  []byte
-	tokenTTL   time.Duration
+	workspaces           workspaceStore
+	jwtSecret            []byte
+	tokenTTL             time.Duration
+	allowLocalConnection bool
 }
 
-func NewAuthService(workspaces workspaceStore, jwtSecret string, tokenTTL time.Duration) *AuthService {
+func NewAuthService(
+	workspaces workspaceStore,
+	jwtSecret string,
+	tokenTTL time.Duration,
+	allowLocalConnection bool,
+) *AuthService {
 	return &AuthService{
-		workspaces: workspaces,
-		jwtSecret:  []byte(jwtSecret),
-		tokenTTL:   tokenTTL,
+		workspaces:           workspaces,
+		jwtSecret:            []byte(jwtSecret),
+		tokenTTL:             tokenTTL,
+		allowLocalConnection: allowLocalConnection,
 	}
 }
 
-type WorkspaceService struct{}
+type WorkspaceService struct {
+	allowLocalConnection bool
+}
 
-func NewWorkspaceService() *WorkspaceService {
-	return &WorkspaceService{}
+func NewWorkspaceService(allowLocalConnection bool) *WorkspaceService {
+	return &WorkspaceService{allowLocalConnection: allowLocalConnection}
 }
 
 type TableSchemaService struct{}

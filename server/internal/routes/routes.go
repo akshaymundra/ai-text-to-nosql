@@ -50,14 +50,20 @@ func NewRoutes(logger *zap.Logger, db *pgxpool.Pool, cfg *config.Config) http.Ha
 }
 
 func registerRoutes(logger *zap.Logger, db *pgxpool.Pool, cfg *config.Config) func(router chi.Router) {
-	authService := service.NewAuthService(repo.NewWorkspaceRepo(db), cfg.JWTSecret, cfg.JWTTTL)
+	allowLocalConnection := cfg.AppEnv == config.EnvDevelopment
+	authService := service.NewAuthService(
+		repo.NewWorkspaceRepo(db),
+		cfg.JWTSecret,
+		cfg.JWTTTL,
+		allowLocalConnection,
+	)
 
 	return func(r chi.Router) {
 		r.Route("/auth", AuthRoutes(authService, logger))
 
 		r.Group(func(r chi.Router) {
 			r.Use(appmiddleware.Authenticate(authService, logger))
-			r.Route("/workspace", WorkspaceRoutes(logger))
+			r.Route("/workspace", WorkspaceRoutes(logger, allowLocalConnection))
 			r.Route("/schemas", TableSchemaRoutes(logger))
 			r.Route("/queries", QueryRoutes(logger))
 		})

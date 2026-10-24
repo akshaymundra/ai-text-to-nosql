@@ -3,6 +3,7 @@ package types
 import (
 	"errors"
 	"fmt"
+	"net/url"
 	"reflect"
 	"regexp"
 	"strconv"
@@ -16,6 +17,7 @@ import (
 var (
 	validate             = newValidator()
 	workspaceNamePattern = regexp.MustCompile(`^[A-Za-z0-9][A-Za-z0-9-]{2,62}$`)
+	localHosts           = map[string]bool{"localhost": true, "127.0.0.1": true, "::1": true}
 )
 
 func newValidator() *validator.Validate {
@@ -23,6 +25,10 @@ func newValidator() *validator.Validate {
 	v.RegisterTagNameFunc(jsonFieldName)
 	mustRegister(v, "workspace_name", func(fl validator.FieldLevel) bool {
 		return workspaceNamePattern.MatchString(fl.Field().String())
+	})
+	mustRegister(v, "local_url", func(fl validator.FieldLevel) bool {
+		u, err := url.Parse(fl.Field().String())
+		return err == nil && localHosts[u.Hostname()]
 	})
 	// min/max count runes; maxbytes guards byte limits such as bcrypt's 72.
 	mustRegister(v, "maxbytes", func(fl validator.FieldLevel) bool {
@@ -79,6 +85,8 @@ func fieldMessage(fe validator.FieldError) string {
 		return field + " must be at most " + fe.Param() + " bytes"
 	case "url":
 		return field + " must be a valid URL"
+	case "local_url":
+		return field + " must point to localhost, 127.0.0.1 or ::1"
 	case "workspace_name":
 		return field + " must be 3-63 letters, digits or hyphens, starting with a letter or digit"
 	default:
