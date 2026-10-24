@@ -42,18 +42,18 @@ func TestOperatorRule(t *testing.T) {
 		want   OperatorRule
 		wantOK bool
 	}{
-		{op: OpEq, want: OperatorRule{Arity: ArityOne, PartitionKey: true, SortKey: true}, wantOK: true},
-		{op: OpLt, want: OperatorRule{Arity: ArityOne, SortKey: true}, wantOK: true},
-		{op: OpLte, want: OperatorRule{Arity: ArityOne, SortKey: true}, wantOK: true},
-		{op: OpGt, want: OperatorRule{Arity: ArityOne, SortKey: true}, wantOK: true},
-		{op: OpGte, want: OperatorRule{Arity: ArityOne, SortKey: true}, wantOK: true},
-		{op: OpBetween, want: OperatorRule{Arity: ArityTwo, SortKey: true}, wantOK: true},
-		{op: OpBeginsWith, want: OperatorRule{Arity: ArityOne, SortKey: true, StringOnly: true}, wantOK: true},
-		{op: OpNe, want: OperatorRule{Arity: ArityOne}, wantOK: true},
-		{op: OpIn, want: OperatorRule{Arity: ArityList}, wantOK: true},
-		{op: OpContains, want: OperatorRule{Arity: ArityOne, StringOnly: true}, wantOK: true},
-		{op: OpExists, want: OperatorRule{Arity: ArityNone}, wantOK: true},
-		{op: OpNotExists, want: OperatorRule{Arity: ArityNone}, wantOK: true},
+		{op: OpEq, want: OperatorRule{Arity: ArityOne, PartitionKey: true, SortKey: true, Expression: "%s = %s"}, wantOK: true},
+		{op: OpLt, want: OperatorRule{Arity: ArityOne, SortKey: true, Expression: "%s < %s"}, wantOK: true},
+		{op: OpLte, want: OperatorRule{Arity: ArityOne, SortKey: true, Expression: "%s <= %s"}, wantOK: true},
+		{op: OpGt, want: OperatorRule{Arity: ArityOne, SortKey: true, Expression: "%s > %s"}, wantOK: true},
+		{op: OpGte, want: OperatorRule{Arity: ArityOne, SortKey: true, Expression: "%s >= %s"}, wantOK: true},
+		{op: OpBetween, want: OperatorRule{Arity: ArityTwo, SortKey: true, Expression: "%s BETWEEN %s AND %s"}, wantOK: true},
+		{op: OpBeginsWith, want: OperatorRule{Arity: ArityOne, SortKey: true, StringOnly: true, Expression: "begins_with(%s, %s)"}, wantOK: true},
+		{op: OpNe, want: OperatorRule{Arity: ArityOne, Expression: "%s <> %s"}, wantOK: true},
+		{op: OpIn, want: OperatorRule{Arity: ArityList, Expression: "%s IN (%s)"}, wantOK: true},
+		{op: OpContains, want: OperatorRule{Arity: ArityOne, StringOnly: true, Expression: "contains(%s, %s)"}, wantOK: true},
+		{op: OpExists, want: OperatorRule{Arity: ArityNone, Expression: "attribute_exists(%s)"}, wantOK: true},
+		{op: OpNotExists, want: OperatorRule{Arity: ArityNone, Expression: "attribute_not_exists(%s)"}, wantOK: true},
 		{op: "like", wantOK: false},
 	}
 

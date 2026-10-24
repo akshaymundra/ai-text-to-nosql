@@ -34,21 +34,22 @@ type OperatorRule struct {
 	PartitionKey bool
 	SortKey      bool
 	StringOnly   bool
+	Expression   string
 }
 
 var operatorRules = map[Operator]OperatorRule{
-	OpEq:         {Arity: ArityOne, PartitionKey: true, SortKey: true},
-	OpLt:         {Arity: ArityOne, SortKey: true},
-	OpLte:        {Arity: ArityOne, SortKey: true},
-	OpGt:         {Arity: ArityOne, SortKey: true},
-	OpGte:        {Arity: ArityOne, SortKey: true},
-	OpBetween:    {Arity: ArityTwo, SortKey: true},
-	OpBeginsWith: {Arity: ArityOne, SortKey: true, StringOnly: true},
-	OpNe:         {Arity: ArityOne},
-	OpIn:         {Arity: ArityList},
-	OpContains:   {Arity: ArityOne, StringOnly: true},
-	OpExists:     {Arity: ArityNone},
-	OpNotExists:  {Arity: ArityNone},
+	OpEq:         {Arity: ArityOne, PartitionKey: true, SortKey: true, Expression: "%s = %s"},
+	OpLt:         {Arity: ArityOne, SortKey: true, Expression: "%s < %s"},
+	OpLte:        {Arity: ArityOne, SortKey: true, Expression: "%s <= %s"},
+	OpGt:         {Arity: ArityOne, SortKey: true, Expression: "%s > %s"},
+	OpGte:        {Arity: ArityOne, SortKey: true, Expression: "%s >= %s"},
+	OpBetween:    {Arity: ArityTwo, SortKey: true, Expression: "%s BETWEEN %s AND %s"},
+	OpBeginsWith: {Arity: ArityOne, SortKey: true, StringOnly: true, Expression: "begins_with(%s, %s)"},
+	OpNe:         {Arity: ArityOne, Expression: "%s <> %s"},
+	OpIn:         {Arity: ArityList, Expression: "%s IN (%s)"},
+	OpContains:   {Arity: ArityOne, StringOnly: true, Expression: "contains(%s, %s)"},
+	OpExists:     {Arity: ArityNone, Expression: "attribute_exists(%s)"},
+	OpNotExists:  {Arity: ArityNone, Expression: "attribute_not_exists(%s)"},
 }
 
 func (o Operator) Rule() (OperatorRule, bool) {
