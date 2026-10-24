@@ -11,8 +11,8 @@
     { "name": "status", "type": "string", "description": "Task status: todo, in_progress or done." },
     { "name": "priority", "type": "string", "description": "Task priority: low, medium or high." },
     { "name": "assignee_id", "type": "string", "description": "User ID of the person assigned to the task." },
-    { "name": "due_date", "type": "string", "description": "Due date in YYYY-MM-DD format." },
-    { "name": "created_at", "type": "string", "description": "ISO 8601 timestamp when the task was created." }
+    { "name": "due_date", "type": "string", "format": "date", "description": "Due date in YYYY-MM-DD format." },
+    { "name": "created_at", "type": "string", "format": "timestamp", "description": "ISO 8601 timestamp when the task was created." }
   ],
   "indexes": [
     { "name": "assignee-due-date-index", "partitionKey": "assignee_id", "sortKey": "due_date" },

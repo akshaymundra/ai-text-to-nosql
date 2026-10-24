@@ -38,7 +38,7 @@ One file per table in `server/schemas-local/`. Loaded by `internal/dynamoschema.
 
 **Attributes and descriptions** (read by the LLM and by retrieval)
 - Description says what the value means **and its format/allowed values**: `"Account status: active, invited or disabled."` The LLM copies values literally, so list the exact stored spellings.
-- Dates: one fixed-width UTC format per attribute, stated in the description: `YYYY-MM-DDTHH:MM:SSZ` for timestamps, `YYYY-MM-DD` for pure dates (e.g. `due_date`). The compiler builds range bounds in that format; mixed formats break range queries (see `dynamodb-query-rules`, section 7).
+- Dates: one fixed-width UTC format per attribute, declared with `"format": "timestamp"` (`YYYY-MM-DDTHH:MM:SSZ`) or `"format": "date"` (`YYYY-MM-DD`, e.g. `due_date`), and stated in the description for the LLM. The `dates` stage checks values against it and widens pure-date bounds on timestamps; without `format` no date handling happens. Mixed formats break range queries (see `dynamodb-query-rules`, section 7).
 - Use business words a user would say ("signed up", "owner", "due") in descriptions, because names like `created_at` are not what people type.
 - Reserved words (`status`, `name`, `date`, ...) are fine as attribute names; the compiler always aliases.
 

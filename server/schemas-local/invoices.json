@@ -5,12 +5,12 @@
   "sortKey": "issued_at",
   "attributes": [
     { "name": "organization_id", "type": "string", "description": "ID of the billed organization." },
-    { "name": "issued_at", "type": "string", "description": "ISO 8601 timestamp when the invoice was issued." },
+    { "name": "issued_at", "type": "string", "format": "timestamp", "description": "ISO 8601 timestamp when the invoice was issued." },
     { "name": "invoice_id", "type": "string", "description": "Invoice number (e.g. inv_001)." },
     { "name": "amount", "type": "number", "description": "Invoice total in the invoice currency." },
     { "name": "currency", "type": "string", "description": "ISO 4217 currency code." },
     { "name": "status", "type": "string", "description": "Payment status: paid, open or overdue." },
-    { "name": "due_date", "type": "string", "description": "Payment due date in YYYY-MM-DD format." }
+    { "name": "due_date", "type": "string", "format": "date", "description": "Payment due date in YYYY-MM-DD format." }
   ],
   "indexes": [
     { "name": "status-issued-at-index", "partitionKey": "status", "sortKey": "issued_at" }

@@ -5,7 +5,7 @@
   "sortKey": "created_at",
   "attributes": [
     { "name": "organization_id", "type": "string", "description": "ID of the organization the event belongs to." },
-    { "name": "created_at", "type": "string", "description": "ISO 8601 timestamp when the event happened." },
+    { "name": "created_at", "type": "string", "format": "timestamp", "description": "ISO 8601 timestamp when the event happened." },
     { "name": "actor_id", "type": "string", "description": "User ID of the user who performed the action." },
     { "name": "action", "type": "string", "description": "Event type: user.login, user.invite, user.disable, project.create or task.update." },
     { "name": "resource_type", "type": "string", "description": "Type of the affected resource: user, project or task." },

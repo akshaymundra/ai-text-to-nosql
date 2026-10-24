@@ -13,6 +13,7 @@ const (
 	RejectCodeTooManyValues        RejectionCode = "TOO_MANY_VALUES"
 	RejectCodeValueTypeMismatch    RejectionCode = "VALUE_TYPE_MISMATCH"
 	RejectCodeInvalidRange         RejectionCode = "INVALID_RANGE"
+	RejectCodeInvalidDateFormat    RejectionCode = "INVALID_DATE_FORMAT"
 
 	RejectCodeScanRequired          RejectionCode = "SCAN_REQUIRED"
 	RejectCodeInvalidKeyCondition   RejectionCode = "INVALID_KEY_CONDITION"

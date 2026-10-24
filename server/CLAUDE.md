@@ -10,7 +10,7 @@ Repo layout: `server/` (this Go service) and `client/` (planned frontend for con
 
 Core principle: the LLM is only a parser (English to IR). Index selection, scan detection, validation and compilation are deterministic code. The IR never names an index; the planner picks it. Keep LLM output out of any decision the planner/validator owns.
 
-Pipeline (target, mostly unbuilt): schema retrieval (pgvector, one row per access pattern) → LLM intent extraction (Ollama structured output, enums from retrieved schema) → access-path planner → validator → compiler → `POST /api/v1/query`. Requests needing a scan are rejected; non-key conditions go to `FilterExpression` and return `valid` with a warning.
+Pipeline (target, mostly unbuilt): schema retrieval (pgvector, one row per access pattern) → LLM intent extraction (Ollama structured output, enums from retrieved schema) → validator → dates (format check, widen pure-date bounds on timestamps) → access-path planner → compiler → `POST /api/v1/query`. Requests needing a scan are rejected; non-key conditions go to `FilterExpression` and return `valid` with a warning.
 
 Build order from `docs/idea.md`: planner/validator/compiler are pure code, built test-first with no LLM, before retrieval and LLM work.
 

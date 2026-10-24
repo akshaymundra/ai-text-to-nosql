@@ -22,7 +22,7 @@ Project rules beat community Go advice. "Clear is better than clever": minimal s
 | Request/response DTOs | `internal/types/` | JSON-tagged structs for the HTTP API. |
 | HTTP input validation | `internal/types/` | `validate:"..."` tags (go-playground/validator) on each request struct plus a `Validate() error` method that calls `validateStruct`; handlers call `req.Validate()` right after `utils.DecodeJSON`. Custom tags are registered in `types/validate.go`. Payload checks only; **not** the DynamoDB query validator. |
 | Persistence models | `internal/model/` | Structs mapped to Postgres rows. |
-| Pipeline stages | `internal/service/<stage>/` | Subpackages of `service`: `ir`, `planner`, `validator`, `compiler` (later `retrieval`, `extraction`). Pure packages: input in, result out, tables passed as a parameter, no I/O, no globals, no logging. Only `service` (e.g. `QueryService`) wires them together. |
+| Pipeline stages | `internal/service/<stage>/` | Subpackages of `service`: `ir`, `validator`, `dates`, `planner`, `compiler` (run in that order; later `retrieval`, `extraction`). Pure packages: input in, result out, tables passed as a parameter, no I/O, no globals, no logging. Only `service` (e.g. `QueryService`) wires them together. |
 | DynamoDB table definitions | `internal/dynamoschema/` | `dynamoschema.Table` (a customer table: keys, GSIs, attributes, access patterns) and loaders. Domain type shared by pipeline stages, `model` and `types`; never move it into either. |
 | External integrations | `internal/integrations/<name>/` | e.g. `integrations/ollama`. Thin typed wrapper over the external API; no pipeline logic. |
 | Errors and codes | `internal/apperror/`, `internal/constants/` | See section 2. |

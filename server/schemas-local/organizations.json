@@ -8,7 +8,7 @@
     { "name": "plan", "type": "string", "description": "Subscription plan: free, pro or enterprise." },
     { "name": "status", "type": "string", "description": "Account status: active or suspended." },
     { "name": "country", "type": "string", "description": "ISO 3166-1 alpha-2 country code." },
-    { "name": "created_at", "type": "string", "description": "ISO 8601 timestamp when the organization signed up." }
+    { "name": "created_at", "type": "string", "format": "timestamp", "description": "ISO 8601 timestamp when the organization signed up." }
   ],
   "indexes": [
     { "name": "plan-created-at-index", "partitionKey": "plan", "sortKey": "created_at" }

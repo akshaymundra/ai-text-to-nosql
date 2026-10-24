@@ -5,16 +5,24 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"time"
 )
 
 const (
 	TypeString = "string"
 	TypeNumber = "number"
+
+	FormatDate      = "date"
+	FormatTimestamp = "timestamp"
+
+	dateLayout      = "2006-01-02"
+	timestampLayout = "2006-01-02T15:04:05Z"
 )
 
 type Attribute struct {
 	Name        string `json:"name"`
 	Type        string `json:"type"`
+	Format      string `json:"format,omitempty"`
 	Description string `json:"description"`
 }
 
@@ -47,6 +55,23 @@ func (t Table) Attribute(name string) (Attribute, bool) {
 		}
 	}
 	return Attribute{}, false
+}
+
+func IsDate(v string) bool {
+	return matchesLayout(v, dateLayout)
+}
+
+func IsTimestamp(v string) bool {
+	return matchesLayout(v, timestampLayout)
+}
+
+// time.Parse accepts fractional seconds the layout does not mention, so the length check keeps values fixed-width.
+func matchesLayout(v, layout string) bool {
+	if len(v) != len(layout) {
+		return false
+	}
+	_, err := time.Parse(layout, v)
+	return err == nil
 }
 
 func LoadDir(dir string) ([]Table, error) {
