@@ -1,6 +1,11 @@
 package ir
 
-import "github.com/akshaymundra/ai-text-to-nosql/internal/constants"
+import (
+	"maps"
+	"slices"
+
+	"github.com/akshaymundra/ai-text-to-nosql/internal/constants"
+)
 
 type Operator string
 
@@ -50,6 +55,11 @@ var operatorRules = map[Operator]OperatorRule{
 	OpContains:   {Arity: ArityOne, StringOnly: true, Expression: "contains(%s, %s)"},
 	OpExists:     {Arity: ArityNone, Expression: "attribute_exists(%s)"},
 	OpNotExists:  {Arity: ArityNone, Expression: "attribute_not_exists(%s)"},
+}
+
+// Operators lists every operator in a fixed order, so anything built from it (like a JSON schema enum) is stable.
+func Operators() []Operator {
+	return slices.Sorted(maps.Keys(operatorRules))
 }
 
 func (o Operator) Rule() (OperatorRule, bool) {

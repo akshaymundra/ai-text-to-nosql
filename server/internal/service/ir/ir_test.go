@@ -90,3 +90,13 @@ func TestConditionValues(t *testing.T) {
 		})
 	}
 }
+
+func TestOperators(t *testing.T) {
+	want := []Operator{
+		OpBeginsWith, OpBetween, OpContains, OpEq, OpExists, OpGt,
+		OpGte, OpIn, OpLt, OpLte, OpNe, OpNotExists,
+	}
+	if diff := cmp.Diff(want, Operators()); diff != "" {
+		t.Errorf("operators mismatch (-want +got):\n%s", diff)
+	}
+}
