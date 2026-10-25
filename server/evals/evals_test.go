@@ -16,8 +16,6 @@ import (
 	"github.com/akshaymundra/ai-text-to-nosql/internal/service/ir"
 )
 
-const queryLimit = 25
-
 // TestCases runs each case's reference IR through the pipeline, which proves the expect blocks are right
 // before any LLM is involved.
 func TestCases(t *testing.T) {
@@ -36,7 +34,7 @@ func TestCases(t *testing.T) {
 	for _, c := range cases {
 		t.Run(c.ID, func(t *testing.T) {
 			ex := extraction.Extraction{Query: c.IR, UnmappedTerms: c.UnmappedTerms}
-			result, err := service.BuildQuery(ex, tables, queryLimit)
+			result, err := service.BuildQuery(ex, tables, service.DefaultQueryLimit)
 			if err != nil {
 				t.Fatalf("build query: %v", err)
 			}

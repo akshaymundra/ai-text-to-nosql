@@ -94,6 +94,16 @@ func NewFieldSuggester(embedder embedder, embeddingModel string) *FieldSuggester
 	return &FieldSuggester{embedder: embedder, embeddingModel: embeddingModel}
 }
 
+type QueryRunner struct {
+	retriever *Retriever
+	extractor *Extractor
+	suggester *FieldSuggester
+}
+
+func NewQueryRunner(retriever *Retriever, extractor *Extractor, suggester *FieldSuggester) *QueryRunner {
+	return &QueryRunner{retriever: retriever, extractor: extractor, suggester: suggester}
+}
+
 type WorkspaceService struct {
 	allowLocalConnection bool
 }

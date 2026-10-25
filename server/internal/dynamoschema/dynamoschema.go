@@ -57,6 +57,15 @@ func (t Table) Attribute(name string) (Attribute, bool) {
 	return Attribute{}, false
 }
 
+func FindTable(tables []Table, name string) (Table, bool) {
+	for _, t := range tables {
+		if t.Name == name {
+			return t, true
+		}
+	}
+	return Table{}, false
+}
+
 func IsDate(v string) bool {
 	return matchesLayout(v, dateLayout)
 }

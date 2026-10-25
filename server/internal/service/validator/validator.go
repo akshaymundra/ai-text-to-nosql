@@ -9,7 +9,7 @@ import (
 const maxInValues = 100
 
 func Validate(q ir.Query, tables []dynamoschema.Table) (dynamoschema.Table, []ir.Rejection) {
-	table, ok := findTable(tables, q.Entity)
+	table, ok := dynamoschema.FindTable(tables, q.Entity)
 	if !ok {
 		return dynamoschema.Table{}, []ir.Rejection{{Code: constants.RejectCodeUnknownTable, Field: q.Entity}}
 	}
@@ -21,15 +21,6 @@ func Validate(q ir.Query, tables []dynamoschema.Table) (dynamoschema.Table, []ir
 		}
 	}
 	return table, rejections
-}
-
-func findTable(tables []dynamoschema.Table, name string) (dynamoschema.Table, bool) {
-	for _, t := range tables {
-		if t.Name == name {
-			return t, true
-		}
-	}
-	return dynamoschema.Table{}, false
 }
 
 func checkCondition(c ir.Condition, table dynamoschema.Table) (constants.RejectionCode, bool) {
