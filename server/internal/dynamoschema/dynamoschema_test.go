@@ -139,6 +139,34 @@ func TestCheck(t *testing.T) {
 			wantErr: "at least one access pattern is required",
 		},
 		{
+			name:    "table description too long",
+			mutate:  func(t *Table) { t.Description = strings.Repeat("é", maxDescriptionLength+1) },
+			wantErr: "description must be at most 1000 characters",
+		},
+		{
+			name:   "description at the limit",
+			mutate: func(t *Table) { t.Description = strings.Repeat("é", maxDescriptionLength) },
+		},
+		{
+			name:    "attribute description too long",
+			mutate:  func(t *Table) { t.Attributes[2].Description = strings.Repeat("a", maxDescriptionLength+1) },
+			wantErr: `attribute "assignee_id" description must be at most 1000 characters`,
+		},
+		{
+			name:    "access pattern description too long",
+			mutate:  func(t *Table) { t.AccessPatterns[0].Description = strings.Repeat("a", maxDescriptionLength+1) },
+			wantErr: "access pattern 1 description must be at most 1000 characters",
+		},
+		{
+			name: "too many access patterns",
+			mutate: func(t *Table) {
+				for len(t.AccessPatterns) <= maxAccessPatterns {
+					t.AccessPatterns = append(t.AccessPatterns, AccessPattern{Description: "List tasks."})
+				}
+			},
+			wantErr: "at most 50 access patterns are allowed",
+		},
+		{
 			name:    "access pattern without description",
 			mutate:  func(t *Table) { t.AccessPatterns[0].Description = "" },
 			wantErr: "access pattern 1 has no description",

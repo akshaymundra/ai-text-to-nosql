@@ -7,6 +7,13 @@ import (
 	"errors"
 	"fmt"
 	"regexp"
+	"unicode/utf8"
+)
+
+// Caps bound the work one PUT can cause: every access pattern is one embedding and one row.
+const (
+	maxAccessPatterns    = 50
+	maxDescriptionLength = 1000
 )
 
 var namePattern = regexp.MustCompile(`^[A-Za-z0-9_.-]{3,255}$`)
@@ -19,6 +26,9 @@ func (t Table) Check() error {
 	}
 	if t.Description == "" {
 		problems = append(problems, errors.New("description is required"))
+	}
+	if tooLong(t.Description) {
+		problems = append(problems, fmt.Errorf("description must be at most %d characters", maxDescriptionLength))
 	}
 	if t.PartitionKey == "" {
 		problems = append(problems, errors.New("partition key is required"))
@@ -63,6 +73,11 @@ func (t Table) checkAttributes() []error {
 		if a.Format != "" && a.Type != TypeString {
 			problems = append(problems, fmt.Errorf("attribute %q has a format but is not a string", a.Name))
 		}
+		if tooLong(a.Description) {
+			problems = append(problems, fmt.Errorf(
+				"attribute %q description must be at most %d characters", a.Name, maxDescriptionLength,
+			))
+		}
 	}
 	return problems
 }
@@ -104,12 +119,20 @@ func (t Table) checkAccessPatterns() []error {
 	if len(t.AccessPatterns) == 0 {
 		return []error{errors.New("at least one access pattern is required")}
 	}
+	if len(t.AccessPatterns) > maxAccessPatterns {
+		return []error{fmt.Errorf("at most %d access patterns are allowed", maxAccessPatterns)}
+	}
 
 	var problems []error
 	for i, p := range t.AccessPatterns {
 		number := i + 1
 		if p.Description == "" {
 			problems = append(problems, fmt.Errorf("access pattern %d has no description", number))
+		}
+		if tooLong(p.Description) {
+			problems = append(problems, fmt.Errorf(
+				"access pattern %d description must be at most %d characters", number, maxDescriptionLength,
+			))
 		}
 		if p.Index != "" && !t.hasIndex(p.Index) {
 			problems = append(problems, fmt.Errorf("access pattern %d uses unknown index %q", number, p.Index))
@@ -125,4 +148,8 @@ func (t Table) hasIndex(name string) bool {
 		}
 	}
 	return false
+}
+
+func tooLong(s string) bool {
+	return utf8.RuneCountInString(s) > maxDescriptionLength
 }

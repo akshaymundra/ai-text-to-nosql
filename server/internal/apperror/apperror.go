@@ -36,6 +36,10 @@ func Conflict(msg string) *AppError {
 	return &AppError{Code: constants.ErrCodeConflict, Message: msg, HTTPStatus: http.StatusConflict}
 }
 
+func PayloadTooLarge(msg string) *AppError {
+	return &AppError{Code: constants.ErrCodePayloadTooLarge, Message: msg, HTTPStatus: http.StatusRequestEntityTooLarge}
+}
+
 func Internal(msg string) *AppError {
 	return &AppError{Code: constants.ErrCodeInternalServerError, Message: msg, HTTPStatus: http.StatusInternalServerError}
 }

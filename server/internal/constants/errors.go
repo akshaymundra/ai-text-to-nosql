@@ -10,6 +10,7 @@ const (
 	ErrCodeForbidden           QueryErrCode = "FORBIDDEN"
 	ErrCodeNotFound            QueryErrCode = "NOT_FOUND"
 	ErrCodeConflict            QueryErrCode = "CONFLICT"
+	ErrCodePayloadTooLarge     QueryErrCode = "PAYLOAD_TOO_LARGE"
 	ErrCodeInternalServerError QueryErrCode = "INTERNAL_SERVER_ERROR"
 	ErrCodeNotImplemented      QueryErrCode = "NOT_IMPLEMENTED"
 )

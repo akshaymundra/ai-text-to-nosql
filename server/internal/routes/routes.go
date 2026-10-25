@@ -23,6 +23,7 @@ func NewRoutes(logger *zap.Logger, db *pgxpool.Pool, cfg *config.Config) http.Ha
 
 	r.Use(middleware.Recoverer)
 	r.Use(middleware.RequestID)
+	r.Use(middleware.RequestSize(utils.MaxBodyBytes))
 	r.Use(utils.RequestLogger(logger))
 
 	r.Use(cors.New(cors.Options{
