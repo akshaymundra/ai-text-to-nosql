@@ -20,6 +20,11 @@ type Config struct {
 	OllamaURL      string
 	OllamaTimeout  time.Duration
 	EmbeddingModel string
+
+	DynamoDBEndpoint      string
+	DynamoDBRegion        string
+	DemoWorkspace         string
+	DemoWorkspacePassword string
 }
 
 const EnvDevelopment = "development"
@@ -47,6 +52,11 @@ func Init() {
 			OllamaURL:      getEnv("OLLAMA_URL", "http://localhost:11434"),
 			OllamaTimeout:  getDurationEnv("OLLAMA_TIMEOUT", 60*time.Second),
 			EmbeddingModel: getEnv("EMBEDDING_MODEL", "qwen3-embedding:0.6b"),
+
+			DynamoDBEndpoint:      getEnv("DYNAMODB_ENDPOINT", "http://localhost:8081"),
+			DynamoDBRegion:        getEnv("DYNAMODB_REGION", "ap-south-1"),
+			DemoWorkspace:         getEnv("DEMO_WORKSPACE", "demo-local"),
+			DemoWorkspacePassword: os.Getenv("DEMO_WORKSPACE_PASSWORD"),
 		}
 	})
 }

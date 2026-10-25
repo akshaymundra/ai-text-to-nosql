@@ -14,7 +14,7 @@ Project rules beat community Go advice. "Clear is better than clever": minimal s
 
 | Concern | Location | Pattern |
 |---|---|---|
-| Entrypoints | `cmd/api`, `cmd/seed-local` | `main` only wires things; no business logic. `cmd/api/app.go` opens DB clients (Postgres pool) and injects them downward. |
+| Entrypoints | `cmd/api`, `cmd/seed-local`, `cmd/register-demo`, `cmd/eval-retrieval` | `main` only wires things; no business logic. Entrypoints open the Postgres pool with `postgres.NewPool` (`internal/postgres`, registers pgvector types) and inject it downward. |
 | Routes | `internal/routes/<feature>.go` | `func <Feature>Routes() func(chi.Router)` builds service → handler and mounts handlers; register it in `registerRoutes` in `routes.go`. |
 | HTTP handlers | `internal/handler/<feature>.go` | Methods on the handler struct declared in `handler/init.go`. Decode request, call service, write response. No business logic. |
 | Business logic | `internal/service/<feature>.go` | Methods on the service struct declared in `service/init.go`. Orchestrates pipeline stages, repos and integrations. |
@@ -50,7 +50,7 @@ Add a new top-level package only when no row above fits, and say why.
 
 ## 4. Config and env
 
-- New setting: add a field to `config.Config`, read it in `config.Init` with `getEnv(KEY, default)`, add the key to `server/.env.sample` (app keys only; seed/dev-only keys stay out).
+- New setting: add a field to `config.Config`, read it in `config.Init` with `getEnv(KEY, default)`, add the key to `server/.env.sample`. Local tooling (`cmd/seed-local`, `cmd/register-demo`, `cmd/eval-retrieval`) reads the same `config` (its keys sit in their own `.env.sample` section), so a port, endpoint, region or workspace name is set in one place; never hardcode them in a command.
 - Code reads `config.GetInstance()` at wiring time and passes values down. Stage packages never read config or env.
 - Secrets never get defaults in code.
 

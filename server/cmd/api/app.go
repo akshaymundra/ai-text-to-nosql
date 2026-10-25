@@ -7,10 +7,9 @@ import (
 	"time"
 
 	"github.com/akshaymundra/ai-text-to-nosql/internal/config"
+	"github.com/akshaymundra/ai-text-to-nosql/internal/postgres"
 	"github.com/akshaymundra/ai-text-to-nosql/internal/routes"
-	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgxpool"
-	pgxvec "github.com/pgvector/pgvector-go/pgx"
 	"go.uber.org/zap"
 )
 
@@ -24,7 +23,7 @@ type App struct {
 func NewApp(ctx context.Context, cfg *config.Config) (*App, error) {
 	logger, _ := zap.NewProduction()
 
-	db, err := newPostgresPool(ctx, cfg.DatabaseURL, cfg.DBPingTimeout)
+	db, err := postgres.NewPool(ctx, cfg.DatabaseURL, cfg.DBPingTimeout)
 	if err != nil {
 		return nil, err
 	}
@@ -42,31 +41,6 @@ func NewApp(ctx context.Context, cfg *config.Config) (*App, error) {
 
 func (a *App) Close() {
 	a.db.Close()
-}
-
-func newPostgresPool(ctx context.Context, url string, pingTimeout time.Duration) (*pgxpool.Pool, error) {
-	poolConfig, err := pgxpool.ParseConfig(url)
-	if err != nil {
-		return nil, fmt.Errorf("parsing postgres url: %w", err)
-	}
-	poolConfig.AfterConnect = func(ctx context.Context, conn *pgx.Conn) error {
-		return pgxvec.RegisterTypes(ctx, conn)
-	}
-
-	pool, err := pgxpool.NewWithConfig(ctx, poolConfig)
-	if err != nil {
-		return nil, fmt.Errorf("creating postgres pool: %w", err)
-	}
-
-	pingCtx, cancel := context.WithTimeout(ctx, pingTimeout)
-	defer cancel()
-
-	if err := pool.Ping(pingCtx); err != nil {
-		pool.Close()
-		return nil, fmt.Errorf("pinging postgres: %w", err)
-	}
-
-	return pool, nil
 }
 
 func (a *App) Start(ctx context.Context) error {

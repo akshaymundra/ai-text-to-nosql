@@ -6,7 +6,6 @@ import (
 	"fmt"
 	"log"
 	"net/url"
-	"os"
 	"time"
 
 	"github.com/aws/aws-sdk-go-v2/aws"
@@ -15,15 +14,14 @@ import (
 	"github.com/aws/aws-sdk-go-v2/feature/dynamodb/attributevalue"
 	"github.com/aws/aws-sdk-go-v2/service/dynamodb"
 	"github.com/aws/aws-sdk-go-v2/service/dynamodb/types"
-	"github.com/joho/godotenv"
 
+	appconfig "github.com/akshaymundra/ai-text-to-nosql/internal/config"
 	"github.com/akshaymundra/ai-text-to-nosql/internal/dynamoschema"
 )
 
 const (
-	defaultEndpoint = "http://localhost:8081"
-	batchSize       = 25
-	waitTimeout     = time.Minute
+	batchSize   = 25
+	waitTimeout = time.Minute
 )
 
 var scalarTypes = map[string]types.ScalarAttributeType{
@@ -39,14 +37,15 @@ var localHosts = map[string]bool{
 
 func main() {
 	ctx := context.Background()
-	_ = godotenv.Load()
+	appconfig.Init()
+	cfg := appconfig.GetInstance()
 
 	tables, err := dynamoschema.LoadDir("schemas-local")
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	client, err := newClient(ctx)
+	client, err := newClient(ctx, cfg.DynamoDBEndpoint, cfg.DynamoDBRegion)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -62,17 +61,13 @@ func main() {
 	}
 }
 
-func newClient(ctx context.Context) (*dynamodb.Client, error) {
-	endpoint := os.Getenv("DYNAMODB_ENDPOINT")
-	if endpoint == "" {
-		endpoint = defaultEndpoint
-	}
+func newClient(ctx context.Context, endpoint, region string) (*dynamodb.Client, error) {
 	if err := requireLocal(endpoint); err != nil {
 		return nil, err
 	}
 
 	cfg, err := config.LoadDefaultConfig(ctx,
-		config.WithRegion("ap-south-1"),
+		config.WithRegion(region),
 		config.WithCredentialsProvider(credentials.NewStaticCredentialsProvider("local", "local", "")),
 	)
 	if err != nil {

@@ -152,3 +152,28 @@ func TestTimeout(t *testing.T) {
 		t.Fatal("expected a timeout error, got nil")
 	}
 }
+
+func TestWithHeader(t *testing.T) {
+	var gotAuth, gotTrace []string
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		gotAuth = append(gotAuth, r.Header.Get("Authorization"))
+		gotTrace = append(gotTrace, r.Header.Get("X-Trace"))
+	}))
+	defer server.Close()
+
+	base := New(server.URL, time.Second)
+	authed := base.WithHeader("Authorization", "Bearer token").WithHeader("X-Trace", "abc")
+
+	for _, c := range []*Client{authed, base} {
+		if err := c.Get(context.Background(), "/", nil); err != nil {
+			t.Fatalf("unexpected error: %v", err)
+		}
+	}
+
+	if diff := cmp.Diff([]string{"Bearer token", ""}, gotAuth); diff != "" {
+		t.Errorf("authorization headers mismatch (-want +got):\n%s", diff)
+	}
+	if diff := cmp.Diff([]string{"abc", ""}, gotTrace); diff != "" {
+		t.Errorf("trace headers mismatch (-want +got):\n%s", diff)
+	}
+}

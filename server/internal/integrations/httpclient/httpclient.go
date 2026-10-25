@@ -15,6 +15,7 @@ const maxErrorBodyBytes = 4096
 type Client struct {
 	baseURL    string
 	httpClient *http.Client
+	headers    map[string]string
 }
 
 // StatusError is a non-2xx response. Body holds the start of the response so each integration can read its
@@ -33,6 +34,16 @@ func New(baseURL string, timeout time.Duration) *Client {
 		baseURL:    baseURL,
 		httpClient: &http.Client{Timeout: timeout},
 	}
+}
+
+// WithHeader returns a copy of the client that sends the header on every request.
+func (c *Client) WithHeader(key, value string) *Client {
+	headers := make(map[string]string, len(c.headers)+1)
+	for k, v := range c.headers {
+		headers[k] = v
+	}
+	headers[key] = value
+	return &Client{baseURL: c.baseURL, httpClient: c.httpClient, headers: headers}
 }
 
 func (c *Client) Get(ctx context.Context, path string, out any) error {
@@ -60,6 +71,9 @@ func (c *Client) do(ctx context.Context, method, path string, body, out any) err
 	req, err := newRequest(ctx, method, c.baseURL+path, body)
 	if err != nil {
 		return err
+	}
+	for key, value := range c.headers {
+		req.Header.Set(key, value)
 	}
 
 	resp, err := c.httpClient.Do(req)

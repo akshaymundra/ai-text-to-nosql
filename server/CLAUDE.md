@@ -42,6 +42,8 @@ make build    # bin/api
 make test     # go test -race ./...
 make lint     # golangci-lint run ./...
 make seed     # go run ./cmd/seed-local
+make register-demo   # needs the server running and DEMO_WORKSPACE_PASSWORD in .env; creates/logs in to workspace DEMO_WORKSPACE on SERVER_PORT and PUTs every schemas-local file (writes to Postgres: Akshay runs it)
+make eval-retrieval  # read-only: retrieves tables for every eval case request in demo-local, prints recall@1 and recall@3
 make migrate-create name=<snake_case_name>   # new goose migration in migrations/
 make migrate-status                          # read-only
 make migrate-up / make migrate-down          # Akshay only, never Claude
@@ -50,7 +52,7 @@ go test -race -run TestName ./internal/<pkg>   # single test
 
 Migration targets read `DATABASE_URL` from `.env` via Make's `-include`, so a `$` or `#` in the URL must be escaped (`$$`, `\#`). Goose runs as a pinned tool (`go tool goose`, v3.27.0, the last release supporting Go 1.25).
 
-`make seed` needs DynamoDB Local (default `http://localhost:8081`, override with `DYNAMODB_ENDPOINT`). It **drops and recreates** every table in `schemas-local/`, then batch-inserts `exampleRecords`. Must run from `server/` (reads `schemas-local/` relatively).
+`make seed` needs DynamoDB Local at `DYNAMODB_ENDPOINT` (default `http://localhost:8081`, region `DYNAMODB_REGION`). It **drops and recreates** every table in `schemas-local/`, then batch-inserts `exampleRecords`. Must run from `server/` (reads `schemas-local/` relatively).
 
 ## Architecture
 
@@ -62,7 +64,7 @@ Migration targets read `DATABASE_URL` from `.env` via Make's `-include`, so a `$
 - Layering: routes → `handler` → `service` → `repo`. API boilerplate is in place under `/api/v1`: `auth` (register, login; public), and behind `middleware.Authenticate`: `workspace` (get, `PUT /connection`), `schemas` (list, get/put/delete `/{tableName}`), `queries` (create, list, get `/{queryID}`, `POST /{queryID}/execute`, `GET /{queryID}/executions`). Handlers decode, call the service and write the response; service methods not built yet return `apperror.NotImplemented` (501).
 - Auth: `POST /auth/register` and `/auth/login` take workspace `name` (stored lowercase) + password (bcrypt), return an HS256 JWT (`sub` = workspace ID, TTL `JWT_TTL`, secret `JWT_SECRET`, required). `middleware.Authenticate(authService, logger)` verifies `Authorization: Bearer <jwt>` via `AuthService.VerifyToken` and puts the workspace ID in the context for `middleware.WorkspaceID(ctx)`; handlers never take a workspace ID from the URL or body. Unknown name and wrong password return the same 401. Request payloads are validated by `validate` tags plus `req.Validate()` in `types/` (shared validator and custom tags in `types/validate.go`), called by the handler after decoding.
 - Handlers decode bodies with `utils.DecodeJSON` (400 on bad JSON) and send every error through `utils.WriteError`: `*apperror.AppError` is written as-is, anything else is logged with `request_id` and returned as a generic 500.
-- `internal/config`: `sync.Once` singleton from env vars; call `config.Init()` before `GetInstance()`. `Init` loads `.env` via godotenv (missing file ignored, real env vars win). `.env.sample` lists app keys only; `DYNAMODB_ENDPOINT` is seed-only.
+- `internal/config`: `sync.Once` singleton from env vars; call `config.Init()` before `GetInstance()`. `Init` loads `.env` via godotenv (missing file ignored, real env vars win). Local tooling reads the same config; its keys (`DYNAMODB_ENDPOINT`, `DYNAMODB_REGION`, `DEMO_WORKSPACE`, `DEMO_WORKSPACE_PASSWORD`) have their own `.env.sample` section.
 - `internal/apperror` + `internal/constants`: typed `AppError` with code and HTTP status; error codes live in `constants/errors.go`.
 - `internal/utils/response.go`: `JSON` / `JSONError` wrap payloads as `{"data": ...}` / `{"error": ...}`; `WriteError` maps errors to responses. `utils/request.go`: `DecodeJSON`.
 - `internal/model`: one file per Postgres table, structs with `db` tags matching `migrations/` (for `pgx.RowToStructByName`). Nullable columns are pointers or nil-able `json.RawMessage`; `jsonb` columns scan into typed fields (`dynamoschema.Table`, `[]string`). Column enums (`ConnectionType`, `QueryStatus`) live next to their model. A migration that changes a table must update its model.

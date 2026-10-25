@@ -14,7 +14,7 @@ import (
 // Starting values; retune them from the retrieval score over the eval cases.
 const (
 	retrievalPatternLimit = 5
-	retrievalMaxTables    = 3
+	RetrievalMaxTables    = 3
 )
 
 type Retrieved struct {
@@ -45,7 +45,7 @@ func (r *Retriever) Retrieve(ctx context.Context, workspaceID, request string) (
 		patterns[i] = model.RetrievedPattern{AccessPatternID: m.ID, Distance: m.Distance}
 	}
 	return Retrieved{
-		Tables:   retrieval.SelectTables(ranked, retrievalMaxTables),
+		Tables:   retrieval.SelectTables(ranked, RetrievalMaxTables),
 		Patterns: patterns,
 	}, nil
 }
