@@ -1,0 +1,13 @@
+{
+  "id": "002-users-email-contains-gmail",
+  "request": "Find users whose email contains gmail",
+  "now": "2026-10-07T12:00:00Z",
+  "tags": ["reject", "scan"],
+  "ir": {
+    "entity": "users",
+    "conditions": [
+      { "field": "email", "operator": "contains", "value": "gmail" }
+    ]
+  },
+  "expect": { "status": "rejected", "code": "SCAN_REQUIRED" }
+}
