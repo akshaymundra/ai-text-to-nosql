@@ -4,6 +4,8 @@ import (
 	"context"
 	"time"
 
+	"github.com/pgvector/pgvector-go"
+
 	"github.com/akshaymundra/ai-text-to-nosql/internal/model"
 )
 
@@ -12,6 +14,16 @@ type tableSchemaStore interface {
 	Get(ctx context.Context, workspaceID, tableName string) (model.TableSchema, error)
 	List(ctx context.Context, workspaceID string) ([]model.TableSchema, error)
 	Delete(ctx context.Context, workspaceID, tableName string) error
+}
+
+type accessPatternSearcher interface {
+	Search(
+		ctx context.Context,
+		workspaceID string,
+		embedding pgvector.Vector,
+		embeddingModel string,
+		limit int,
+	) ([]model.AccessPatternMatch, error)
 }
 
 type embedder interface {
@@ -41,6 +53,20 @@ func NewAuthService(
 		jwtSecret:            []byte(jwtSecret),
 		tokenTTL:             tokenTTL,
 		allowLocalConnection: allowLocalConnection,
+	}
+}
+
+type Retriever struct {
+	patterns       accessPatternSearcher
+	embedder       embedder
+	embeddingModel string
+}
+
+func NewRetriever(patterns accessPatternSearcher, embedder embedder, embeddingModel string) *Retriever {
+	return &Retriever{
+		patterns:       patterns,
+		embedder:       embedder,
+		embeddingModel: embeddingModel,
 	}
 }
 

@@ -13,3 +13,20 @@ func DocumentText(table dynamoschema.Table, pattern dynamoschema.AccessPattern) 
 func QueryText(request string) string {
 	return queryInstruction + request
 }
+
+// SelectTables keeps each table once, at the rank of its best matching access pattern, up to max tables.
+func SelectTables(ranked []dynamoschema.Table, max int) []dynamoschema.Table {
+	selected := []dynamoschema.Table{}
+	seen := map[string]bool{}
+	for _, table := range ranked {
+		if len(selected) == max {
+			break
+		}
+		if seen[table.Name] {
+			continue
+		}
+		seen[table.Name] = true
+		selected = append(selected, table)
+	}
+	return selected
+}
