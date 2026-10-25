@@ -24,7 +24,7 @@ Project rules beat community Go advice. "Clear is better than clever": minimal s
 | Persistence models | `internal/model/` | Structs mapped to Postgres rows. |
 | Pipeline stages | `internal/service/<stage>/` | Subpackages of `service`: `ir`, `validator`, `dates`, `planner`, `compiler` (run in that order; later `retrieval`, `extraction`). Pure packages: input in, result out, tables passed as a parameter, no I/O, no globals, no logging. Only `service` (e.g. `QueryService`) wires them together. |
 | DynamoDB table definitions | `internal/dynamoschema/` | `dynamoschema.Table` (a customer table: keys, GSIs, attributes, access patterns) and loaders. Domain type shared by pipeline stages, `model` and `types`; never move it into either. |
-| External integrations | `internal/integrations/<name>/` | e.g. `integrations/ollama`. Thin typed wrapper over the external API; no pipeline logic. |
+| External integrations | `internal/integrations/<name>/` | e.g. `integrations/ollama`. Thin typed wrapper over the external API; no pipeline logic. JSON-over-HTTP APIs go through `integrations/httpclient` (`Get/Post/Put/Patch/Delete`: JSON encode/decode, timeout, body close, non-2xx as `*httpclient.StatusError` that the integration maps to its own error format). SDK-based APIs (AWS) use their SDK. |
 | Errors and codes | `internal/apperror/`, `internal/constants/` | See section 2. |
 | Config | `internal/config/` | See section 4. |
 | Cross-cutting HTTP helpers | `internal/utils/` | `JSON`, `JSONError`, `WriteError`, `DecodeJSON`, `RequestLogger`. Do not grow this into a junk drawer. |
