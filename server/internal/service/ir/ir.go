@@ -90,6 +90,7 @@ func (c Condition) Values() []any {
 }
 
 type Rejection struct {
-	Code  constants.RejectionCode `json:"code"`
-	Field string                  `json:"field,omitempty"`
+	Code       constants.RejectionCode `json:"code"`
+	Field      string                  `json:"field,omitempty"`
+	Suggestion string                  `json:"suggestion,omitempty"`
 }

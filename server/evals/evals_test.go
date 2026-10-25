@@ -12,6 +12,7 @@ import (
 	"github.com/akshaymundra/ai-text-to-nosql/internal/model"
 	"github.com/akshaymundra/ai-text-to-nosql/internal/service"
 	"github.com/akshaymundra/ai-text-to-nosql/internal/service/compiler"
+	"github.com/akshaymundra/ai-text-to-nosql/internal/service/extraction"
 	"github.com/akshaymundra/ai-text-to-nosql/internal/service/ir"
 )
 
@@ -34,7 +35,8 @@ func TestCases(t *testing.T) {
 
 	for _, c := range cases {
 		t.Run(c.ID, func(t *testing.T) {
-			result, err := service.BuildQuery(c.IR, tables, queryLimit)
+			ex := extraction.Extraction{Query: c.IR, UnmappedTerms: c.UnmappedTerms}
+			result, err := service.BuildQuery(ex, tables, queryLimit)
 			if err != nil {
 				t.Fatalf("build query: %v", err)
 			}

@@ -4,10 +4,12 @@ import (
 	"context"
 
 	"github.com/akshaymundra/ai-text-to-nosql/internal/apperror"
+	"github.com/akshaymundra/ai-text-to-nosql/internal/constants"
 	"github.com/akshaymundra/ai-text-to-nosql/internal/dynamoschema"
 	"github.com/akshaymundra/ai-text-to-nosql/internal/model"
 	"github.com/akshaymundra/ai-text-to-nosql/internal/service/compiler"
 	"github.com/akshaymundra/ai-text-to-nosql/internal/service/dates"
+	"github.com/akshaymundra/ai-text-to-nosql/internal/service/extraction"
 	"github.com/akshaymundra/ai-text-to-nosql/internal/service/ir"
 	"github.com/akshaymundra/ai-text-to-nosql/internal/service/planner"
 	"github.com/akshaymundra/ai-text-to-nosql/internal/service/validator"
@@ -47,8 +49,14 @@ func (s *QueryService) ListExecutions(ctx context.Context, workspaceID, queryID 
 	return nil, apperror.NotImplemented("list query executions is not implemented")
 }
 
-// BuildQuery runs the deterministic stages on an extracted IR. It does no I/O, so the eval harness calls it directly.
-func BuildQuery(q ir.Query, tables []dynamoschema.Table, limit int32) (QueryResult, error) {
+// BuildQuery runs the deterministic stages on an extraction. It does no I/O, so the eval harness calls it directly.
+// A term the model could not map to any field rejects the request before any stage runs.
+func BuildQuery(ex extraction.Extraction, tables []dynamoschema.Table, limit int32) (QueryResult, error) {
+	if len(ex.UnmappedTerms) > 0 {
+		return rejected(unknownFields(ex.UnmappedTerms)), nil
+	}
+
+	q := ex.Query
 	table, rejections := validator.Validate(q, tables)
 	if len(rejections) > 0 {
 		return rejected(rejections), nil
@@ -74,6 +82,14 @@ func BuildQuery(q ir.Query, tables []dynamoschema.Table, limit int32) (QueryResu
 		Warnings:   path.Warnings(),
 		Rejections: []ir.Rejection{},
 	}, nil
+}
+
+func unknownFields(terms []string) []ir.Rejection {
+	rejections := make([]ir.Rejection, len(terms))
+	for i, term := range terms {
+		rejections[i] = ir.Rejection{Code: constants.RejectCodeUnknownField, Field: term}
+	}
+	return rejections
 }
 
 func rejected(rejections []ir.Rejection) QueryResult {

@@ -85,6 +85,15 @@ func NewExtractor(chat chatter, model string, seed int) *Extractor {
 	return &Extractor{chat: chat, model: model, seed: seed}
 }
 
+type FieldSuggester struct {
+	embedder       embedder
+	embeddingModel string
+}
+
+func NewFieldSuggester(embedder embedder, embeddingModel string) *FieldSuggester {
+	return &FieldSuggester{embedder: embedder, embeddingModel: embeddingModel}
+}
+
 type WorkspaceService struct {
 	allowLocalConnection bool
 }

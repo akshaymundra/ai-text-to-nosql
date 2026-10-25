@@ -9,6 +9,7 @@ import (
 	"github.com/akshaymundra/ai-text-to-nosql/internal/dynamoschema"
 	"github.com/akshaymundra/ai-text-to-nosql/internal/model"
 	"github.com/akshaymundra/ai-text-to-nosql/internal/service/compiler"
+	"github.com/akshaymundra/ai-text-to-nosql/internal/service/extraction"
 	"github.com/akshaymundra/ai-text-to-nosql/internal/service/ir"
 	"github.com/akshaymundra/ai-text-to-nosql/internal/service/planner"
 )
@@ -109,7 +110,7 @@ func TestBuildQuery(t *testing.T) {
 
 	for _, tc := range tests {
 		t.Run(tc.name, func(t *testing.T) {
-			got, err := BuildQuery(tc.query, usersTables, 25)
+			got, err := BuildQuery(extraction.Extraction{Query: tc.query}, usersTables, 25)
 			if err != nil {
 				t.Fatalf("unexpected error: %v", err)
 			}
@@ -117,5 +118,29 @@ func TestBuildQuery(t *testing.T) {
 				t.Errorf("result mismatch (-want +got):\n%s", diff)
 			}
 		})
+	}
+}
+
+func TestBuildQueryUnmappedTerms(t *testing.T) {
+	ex := extraction.Extraction{
+		Query:         ir.Query{Entity: "users", Conditions: []ir.Condition{{Field: "status", Operator: ir.OpEq, Value: "active"}}},
+		UnmappedTerms: []string{"phone number", "salary"},
+	}
+
+	got, err := BuildQuery(ex, usersTables, 25)
+	if err != nil {
+		t.Fatalf("unexpected error: %v", err)
+	}
+
+	want := QueryResult{
+		Status:   model.QueryStatusRejected,
+		Warnings: []planner.Warning{},
+		Rejections: []ir.Rejection{
+			{Code: constants.RejectCodeUnknownField, Field: "phone number"},
+			{Code: constants.RejectCodeUnknownField, Field: "salary"},
+		},
+	}
+	if diff := cmp.Diff(want, got); diff != "" {
+		t.Errorf("result mismatch (-want +got):\n%s", diff)
 	}
 }

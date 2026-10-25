@@ -73,3 +73,28 @@ func TestSelectTables(t *testing.T) {
 		})
 	}
 }
+
+func TestFieldTexts(t *testing.T) {
+	attr := dynamoschema.Attribute{Name: "created_at", Description: "Signup time."}
+	if got, want := FieldText(attr), "created_at: Signup time."; got != want {
+		t.Errorf("FieldText() = %q, want %q", got, want)
+	}
+	want := "Instruct: Given a term from a request for data, retrieve the database field it refers to\nQuery:signup date"
+	if got := TermText("signup date"); got != want {
+		t.Errorf("TermText() = %q, want %q", got, want)
+	}
+}
+
+func TestClosest(t *testing.T) {
+	query := []float32{0.6, 0.8}
+	candidates := [][]float32{{1, 0}, {0, 1}, {-1, 0}}
+
+	index, similarity := Closest(query, candidates)
+
+	if index != 1 || similarity < 0.79 || similarity > 0.81 {
+		t.Errorf("Closest() = %d, %.3f; want 1, 0.800", index, similarity)
+	}
+	if index, _ := Closest(query, nil); index != -1 {
+		t.Errorf("Closest() without candidates = %d, want -1", index)
+	}
+}

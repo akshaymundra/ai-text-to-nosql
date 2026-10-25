@@ -22,7 +22,9 @@ type Case struct {
 	Now     time.Time `json:"now"`
 	Tags    []string  `json:"tags"`
 	IR      ir.Query  `json:"ir"`
-	Expect  Outcome   `json:"expect"`
+	// UnmappedTerms are request words that name no field; a correct extraction reports them instead of guessing.
+	UnmappedTerms []string `json:"unmapped_terms,omitempty"`
+	Expect        Outcome  `json:"expect"`
 }
 
 type Outcome struct {

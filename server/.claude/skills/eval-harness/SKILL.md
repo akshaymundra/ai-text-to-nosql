@@ -47,6 +47,7 @@ A rejection case (`field` only when the rejection names one; `SCAN_REQUIRED` doe
 
 Rules:
 - `ir` is the reference IR: what a correct extraction produces, with relative dates resolved against `now` and dates left as written (`"2026-09-01"`; the `dates` stage widens them). For a rejection case it is the honest IR of the request, which the pipeline then rejects. Never write an IR that only a wrong extraction would produce.
+- A request naming a field no table has ("users by phone number") lists it in `"unmapped_terms": ["phone number"]` next to `ir`; `BuildQuery` turns each term into `UNKNOWN_FIELD` with that term as `field`. Suggestions (`"did you mean name?"`) depend on embeddings, so `expect` never includes them.
 - So no case expects `UNKNOWN_TABLE` (extraction enums make it impossible) or `MULTIPLE_KEY_CONDITIONS` (the honest IR for a range is one `between`); unit tests cover those codes.
 - `expect` is written by hand from the planner and compiler rules, never copied from pipeline output, or the case proves nothing.
 - `ExpressionAttributeValues` are plain JSON values; `OutcomeOf` converts the compiled `{"S": ...}` / `{"N": ...}` before comparing. Filters are each parenthesised. Comparison is exact and relies on deterministic placeholder naming. `Limit` and warnings are not compared.
@@ -55,7 +56,7 @@ Rules:
 - `now` is fixed per case (all current cases use `2026-10-07T12:00:00Z`). Relative dates resolve against it, never the wall clock.
 - Values come from `server/schemas-local/` data, so a valid case also returns rows when executed against DynamoDB Local.
 - Tags name what a case exercises (`gsi`, `table`, `sort-key`, `filter`, `date-range`, `relative-date`, `tie-break`, `reject`, `scan`, ...), so scores can be reported per feature. Reuse existing tags before adding new ones.
-- Current set: `001`-`030` valid, `031`-`045` rejected. Target 30 to 50 cases; grow it when a bug or a new feature needs one.
+- Current set: `001`-`030` valid, `031`-`046` rejected. Target 30 to 50 cases; grow it when a bug or a new feature needs one.
 
 ## Running
 

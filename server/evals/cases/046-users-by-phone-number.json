@@ -1,0 +1,12 @@
+{
+  "id": "046-users-by-phone-number",
+  "request": "Find users by phone number 555-1234",
+  "now": "2026-10-07T12:00:00Z",
+  "tags": ["reject", "unknown-field", "unmapped-term"],
+  "ir": {
+    "entity": "users",
+    "conditions": []
+  },
+  "unmapped_terms": ["phone number"],
+  "expect": {"status": "rejected", "code": "UNKNOWN_FIELD", "field": "phone number"}
+}
