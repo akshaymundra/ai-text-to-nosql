@@ -14,7 +14,7 @@ import (
 
 // PromptVersion is stored with every query so eval scores and saved queries can be traced to the prompt that
 // produced them. Bump it whenever the prompt or schema below changes.
-const PromptVersion = "extraction-v2"
+const PromptVersion = "extraction-v3"
 
 const rules = `You turn a request for data into a JSON description of the filters it asks for. You never write database queries.
 
@@ -37,7 +37,9 @@ Rules:
 - Copy values exactly as the request or the field description spells them. Never translate or invent values.
 - Numbers are JSON numbers; text is a JSON string.
 - Dates: write whole days as YYYY-MM-DD and never add a time or time zone to them; the system does that. Use YYYY-MM-DDTHH:MM:SSZ only when the request names a time of day.
-- A named period (a day, a month, a quarter, a year, last week, the previous month) covers the whole calendar period: use between with its first and last day. The previous month means the previous calendar month, not the last 30 days.
+- A single day is eq with that day as YYYY-MM-DD.
+- A named period longer than a day (a week, a month, a quarter, a year, the previous month) covers the whole calendar period: use between with its first and last day. The previous month means the previous calendar month, not the last 30 days.
+- Keep every exclusion the request states ("except", "other than", "not") as its own condition with ne or not_exists. Never replace an exclusion with a range.
 - Use gte, gt, lte or lt only for open ranges ("since", "after", "before", "until").
 - Resolve relative dates against today's date.
 - A range on one field is one between condition, never two conditions.
