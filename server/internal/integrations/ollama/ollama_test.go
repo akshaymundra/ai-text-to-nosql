@@ -95,3 +95,91 @@ func TestEmbedTimeout(t *testing.T) {
 		t.Fatal("expected a timeout error, got nil")
 	}
 }
+
+func TestChat(t *testing.T) {
+	var gotBody map[string]any
+	server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if r.Method != http.MethodPost || r.URL.Path != "/api/chat" {
+			t.Errorf("request = %s %s, want POST /api/chat", r.Method, r.URL.Path)
+		}
+		if err := json.NewDecoder(r.Body).Decode(&gotBody); err != nil {
+			t.Errorf("decoding request: %v", err)
+		}
+		_, _ = w.Write([]byte(`{"message": {"role": "assistant", "content": "{\"entity\": \"users\"}"}, "done": true, "done_reason": "stop"}`))
+	}))
+	defer server.Close()
+
+	got, err := NewClient(server.URL, time.Second).Chat(context.Background(), ChatRequest{
+		Model: "qwen3.5:9b",
+		Messages: []Message{
+			{Role: RoleSystem, Content: "rules"},
+			{Role: RoleUser, Content: "Get active users"},
+		},
+		Format:  json.RawMessage(`{"type": "object"}`),
+		Options: Options{Temperature: 0, Seed: 42},
+	})
+	if err != nil {
+		t.Fatalf("chat: %v", err)
+	}
+
+	wantBody := map[string]any{
+		"model": "qwen3.5:9b",
+		"messages": []any{
+			map[string]any{"role": "system", "content": "rules"},
+			map[string]any{"role": "user", "content": "Get active users"},
+		},
+		"format":  map[string]any{"type": "object"},
+		"stream":  false,
+		"think":   false,
+		"options": map[string]any{"temperature": float64(0), "seed": float64(42)},
+	}
+	if diff := cmp.Diff(wantBody, gotBody); diff != "" {
+		t.Errorf("request body mismatch (-want +got):\n%s", diff)
+	}
+	if got != `{"entity": "users"}` {
+		t.Errorf("content = %q, want the assistant message content", got)
+	}
+}
+
+func TestChatErrors(t *testing.T) {
+	tests := []struct {
+		name    string
+		status  int
+		body    string
+		wantErr string
+	}{
+		{
+			name:    "error status carries ollama's message",
+			status:  http.StatusNotFound,
+			body:    `{"error": "model \"qwen3.5:9b\" not found, try pulling it first"}`,
+			wantErr: "not found, try pulling it first",
+		},
+		{
+			name:    "output cut off by the token limit",
+			status:  http.StatusOK,
+			body:    `{"message": {"role": "assistant", "content": "{\"entity\":"}, "done": true, "done_reason": "length"}`,
+			wantErr: `stopped early: "length"`,
+		},
+		{
+			name:    "empty content",
+			status:  http.StatusOK,
+			body:    `{"message": {"role": "assistant", "content": ""}, "done": true, "done_reason": "stop"}`,
+			wantErr: "empty response",
+		},
+	}
+
+	for _, tc := range tests {
+		t.Run(tc.name, func(t *testing.T) {
+			server := httptest.NewServer(http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+				w.WriteHeader(tc.status)
+				_, _ = w.Write([]byte(tc.body))
+			}))
+			defer server.Close()
+
+			_, err := NewClient(server.URL, time.Second).Chat(context.Background(), ChatRequest{Model: "m"})
+			if err == nil || !strings.Contains(err.Error(), tc.wantErr) {
+				t.Fatalf("err = %v, want it to contain %q", err, tc.wantErr)
+			}
+		})
+	}
+}

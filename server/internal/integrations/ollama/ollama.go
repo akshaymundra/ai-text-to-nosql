@@ -23,6 +23,43 @@ type embedResponse struct {
 	Embeddings [][]float32 `json:"embeddings"`
 }
 
+const (
+	RoleSystem = "system"
+	RoleUser   = "user"
+)
+
+type Message struct {
+	Role    string `json:"role"`
+	Content string `json:"content"`
+}
+
+type Options struct {
+	Temperature float64 `json:"temperature"`
+	Seed        int     `json:"seed"`
+}
+
+// ChatRequest asks for one non-streamed answer. Format is a JSON schema the answer must follow.
+type ChatRequest struct {
+	Model    string
+	Messages []Message
+	Format   json.RawMessage
+	Options  Options
+}
+
+type chatRequest struct {
+	Model    string          `json:"model"`
+	Messages []Message       `json:"messages"`
+	Format   json.RawMessage `json:"format,omitempty"`
+	Stream   bool            `json:"stream"`
+	Think    bool            `json:"think"`
+	Options  Options         `json:"options"`
+}
+
+type chatResponse struct {
+	Message    Message `json:"message"`
+	DoneReason string  `json:"done_reason"`
+}
+
 type errorResponse struct {
 	Error string `json:"error"`
 }
@@ -40,6 +77,27 @@ func (c *Client) Embed(ctx context.Context, model string, inputs []string) ([][]
 		return nil, fmt.Errorf("ollama embed: got %d embeddings for %d inputs", len(resp.Embeddings), len(inputs))
 	}
 	return resp.Embeddings, nil
+}
+
+// Chat never enables thinking: extraction wants the structured answer only, and thinking tokens cost seconds.
+func (c *Client) Chat(ctx context.Context, req ChatRequest) (string, error) {
+	var resp chatResponse
+	err := c.http.Post(ctx, "/api/chat", chatRequest{
+		Model:    req.Model,
+		Messages: req.Messages,
+		Format:   req.Format,
+		Options:  req.Options,
+	}, &resp)
+	if err != nil {
+		return "", fmt.Errorf("ollama chat: %w", withOllamaMessage(err))
+	}
+	if resp.DoneReason != "stop" {
+		return "", fmt.Errorf("ollama chat: stopped early: %q", resp.DoneReason)
+	}
+	if resp.Message.Content == "" {
+		return "", errors.New("ollama chat: empty response")
+	}
+	return resp.Message.Content, nil
 }
 
 func withOllamaMessage(err error) error {
