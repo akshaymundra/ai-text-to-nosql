@@ -1,0 +1,22 @@
+{
+  "id": "028-audit-events-since",
+  "request": "Acme audit events since October 1",
+  "now": "2026-10-07T12:00:00Z",
+  "tags": ["table", "sort-key", "date-range", "relative-date"],
+  "ir": {
+    "entity": "audit_logs",
+    "conditions": [
+      {"field": "organization_id", "operator": "eq", "value": "acme"},
+      {"field": "created_at", "operator": "gte", "value": "2026-10-01"}
+    ]
+  },
+  "expect": {
+    "status": "valid",
+    "table": "audit_logs",
+    "query": {
+      "KeyConditionExpression": "#n0 = :v0 AND #n1 >= :v1",
+      "ExpressionAttributeNames": {"#n0": "organization_id", "#n1": "created_at"},
+      "ExpressionAttributeValues": {":v0": "acme", ":v1": "2026-10-01T00:00:00Z"}
+    }
+  }
+}

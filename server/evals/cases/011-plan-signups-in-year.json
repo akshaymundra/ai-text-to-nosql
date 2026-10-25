@@ -1,0 +1,23 @@
+{
+  "id": "011-plan-signups-in-year",
+  "request": "Pro plan organizations that signed up in 2026",
+  "now": "2026-10-07T12:00:00Z",
+  "tags": ["gsi", "sort-key", "date-range"],
+  "ir": {
+    "entity": "organizations",
+    "conditions": [
+      {"field": "plan", "operator": "eq", "value": "pro"},
+      {"field": "created_at", "operator": "between", "value": ["2026-01-01", "2026-12-31"]}
+    ]
+  },
+  "expect": {
+    "status": "valid",
+    "table": "organizations",
+    "index": "plan-created-at-index",
+    "query": {
+      "KeyConditionExpression": "#n0 = :v0 AND #n1 BETWEEN :v1 AND :v2",
+      "ExpressionAttributeNames": {"#n0": "plan", "#n1": "created_at"},
+      "ExpressionAttributeValues": {":v0": "pro", ":v1": "2026-01-01T00:00:00Z", ":v2": "2026-12-31T23:59:59Z"}
+    }
+  }
+}

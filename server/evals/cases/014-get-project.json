@@ -1,0 +1,22 @@
+{
+  "id": "014-get-project",
+  "request": "Get project p_002 of acme",
+  "now": "2026-10-07T12:00:00Z",
+  "tags": ["table", "sort-key", "key-lookup"],
+  "ir": {
+    "entity": "projects",
+    "conditions": [
+      {"field": "organization_id", "operator": "eq", "value": "acme"},
+      {"field": "project_id", "operator": "eq", "value": "p_002"}
+    ]
+  },
+  "expect": {
+    "status": "valid",
+    "table": "projects",
+    "query": {
+      "KeyConditionExpression": "#n0 = :v0 AND #n1 = :v1",
+      "ExpressionAttributeNames": {"#n0": "organization_id", "#n1": "project_id"},
+      "ExpressionAttributeValues": {":v0": "acme", ":v1": "p_002"}
+    }
+  }
+}

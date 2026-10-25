@@ -1,0 +1,22 @@
+{
+  "id": "021-get-task",
+  "request": "Get task t_002 in project p_001",
+  "now": "2026-10-07T12:00:00Z",
+  "tags": ["table", "sort-key", "key-lookup", "tie-break"],
+  "ir": {
+    "entity": "tasks",
+    "conditions": [
+      {"field": "project_id", "operator": "eq", "value": "p_001"},
+      {"field": "task_id", "operator": "eq", "value": "t_002"}
+    ]
+  },
+  "expect": {
+    "status": "valid",
+    "table": "tasks",
+    "query": {
+      "KeyConditionExpression": "#n0 = :v0 AND #n1 = :v1",
+      "ExpressionAttributeNames": {"#n0": "project_id", "#n1": "task_id"},
+      "ExpressionAttributeValues": {":v0": "p_001", ":v1": "t_002"}
+    }
+  }
+}

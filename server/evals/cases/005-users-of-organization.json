@@ -1,0 +1,22 @@
+{
+  "id": "005-users-of-organization",
+  "request": "List the users of globex",
+  "now": "2026-10-07T12:00:00Z",
+  "tags": ["gsi"],
+  "ir": {
+    "entity": "users",
+    "conditions": [
+      {"field": "organization_id", "operator": "eq", "value": "globex"}
+    ]
+  },
+  "expect": {
+    "status": "valid",
+    "table": "users",
+    "index": "organization-created-at-index",
+    "query": {
+      "KeyConditionExpression": "#n0 = :v0",
+      "ExpressionAttributeNames": {"#n0": "organization_id"},
+      "ExpressionAttributeValues": {":v0": "globex"}
+    }
+  }
+}

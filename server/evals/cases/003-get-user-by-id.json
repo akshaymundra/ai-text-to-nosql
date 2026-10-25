@@ -1,0 +1,21 @@
+{
+  "id": "003-get-user-by-id",
+  "request": "Get user u_003",
+  "now": "2026-10-07T12:00:00Z",
+  "tags": ["table", "key-lookup"],
+  "ir": {
+    "entity": "users",
+    "conditions": [
+      {"field": "user_id", "operator": "eq", "value": "u_003"}
+    ]
+  },
+  "expect": {
+    "status": "valid",
+    "table": "users",
+    "query": {
+      "KeyConditionExpression": "#n0 = :v0",
+      "ExpressionAttributeNames": {"#n0": "user_id"},
+      "ExpressionAttributeValues": {":v0": "u_003"}
+    }
+  }
+}

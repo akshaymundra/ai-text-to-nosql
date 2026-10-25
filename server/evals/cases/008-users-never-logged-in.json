@@ -1,0 +1,24 @@
+{
+  "id": "008-users-never-logged-in",
+  "request": "Acme users who have never logged in",
+  "now": "2026-10-07T12:00:00Z",
+  "tags": ["gsi", "filter", "not-exists"],
+  "ir": {
+    "entity": "users",
+    "conditions": [
+      {"field": "organization_id", "operator": "eq", "value": "acme"},
+      {"field": "last_login_at", "operator": "not_exists"}
+    ]
+  },
+  "expect": {
+    "status": "valid",
+    "table": "users",
+    "index": "organization-created-at-index",
+    "query": {
+      "KeyConditionExpression": "#n0 = :v0",
+      "FilterExpression": "(attribute_not_exists(#n1))",
+      "ExpressionAttributeNames": {"#n0": "organization_id", "#n1": "last_login_at"},
+      "ExpressionAttributeValues": {":v0": "acme"}
+    }
+  }
+}

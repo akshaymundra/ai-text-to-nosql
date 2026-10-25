@@ -1,0 +1,23 @@
+{
+  "id": "022-tasks-priority-in",
+  "request": "Tasks of project p_002 with high or medium priority",
+  "now": "2026-10-07T12:00:00Z",
+  "tags": ["table", "filter", "in"],
+  "ir": {
+    "entity": "tasks",
+    "conditions": [
+      {"field": "project_id", "operator": "eq", "value": "p_002"},
+      {"field": "priority", "operator": "in", "value": ["high", "medium"]}
+    ]
+  },
+  "expect": {
+    "status": "valid",
+    "table": "tasks",
+    "query": {
+      "KeyConditionExpression": "#n0 = :v0",
+      "FilterExpression": "(#n1 IN (:v1, :v2))",
+      "ExpressionAttributeNames": {"#n0": "project_id", "#n1": "priority"},
+      "ExpressionAttributeValues": {":v0": "p_002", ":v1": "high", ":v2": "medium"}
+    }
+  }
+}

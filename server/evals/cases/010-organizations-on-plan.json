@@ -1,0 +1,22 @@
+{
+  "id": "010-organizations-on-plan",
+  "request": "Which organizations are on the pro plan?",
+  "now": "2026-10-07T12:00:00Z",
+  "tags": ["gsi"],
+  "ir": {
+    "entity": "organizations",
+    "conditions": [
+      {"field": "plan", "operator": "eq", "value": "pro"}
+    ]
+  },
+  "expect": {
+    "status": "valid",
+    "table": "organizations",
+    "index": "plan-created-at-index",
+    "query": {
+      "KeyConditionExpression": "#n0 = :v0",
+      "ExpressionAttributeNames": {"#n0": "plan"},
+      "ExpressionAttributeValues": {":v0": "pro"}
+    }
+  }
+}

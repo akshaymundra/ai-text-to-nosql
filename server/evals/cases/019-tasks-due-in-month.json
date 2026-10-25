@@ -1,0 +1,23 @@
+{
+  "id": "019-tasks-due-in-month",
+  "request": "Tasks assigned to u_002 due in October",
+  "now": "2026-10-07T12:00:00Z",
+  "tags": ["gsi", "sort-key", "date-range", "relative-date"],
+  "ir": {
+    "entity": "tasks",
+    "conditions": [
+      {"field": "assignee_id", "operator": "eq", "value": "u_002"},
+      {"field": "due_date", "operator": "between", "value": ["2026-10-01", "2026-10-31"]}
+    ]
+  },
+  "expect": {
+    "status": "valid",
+    "table": "tasks",
+    "index": "assignee-due-date-index",
+    "query": {
+      "KeyConditionExpression": "#n0 = :v0 AND #n1 BETWEEN :v1 AND :v2",
+      "ExpressionAttributeNames": {"#n0": "assignee_id", "#n1": "due_date"},
+      "ExpressionAttributeValues": {":v0": "u_002", ":v1": "2026-10-01", ":v2": "2026-10-31"}
+    }
+  }
+}

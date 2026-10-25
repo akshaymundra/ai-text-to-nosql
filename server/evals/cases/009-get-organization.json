@@ -1,0 +1,21 @@
+{
+  "id": "009-get-organization",
+  "request": "Show me the acme organization",
+  "now": "2026-10-07T12:00:00Z",
+  "tags": ["table", "key-lookup"],
+  "ir": {
+    "entity": "organizations",
+    "conditions": [
+      {"field": "organization_id", "operator": "eq", "value": "acme"}
+    ]
+  },
+  "expect": {
+    "status": "valid",
+    "table": "organizations",
+    "query": {
+      "KeyConditionExpression": "#n0 = :v0",
+      "ExpressionAttributeNames": {"#n0": "organization_id"},
+      "ExpressionAttributeValues": {":v0": "acme"}
+    }
+  }
+}

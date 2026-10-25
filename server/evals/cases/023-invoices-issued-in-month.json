@@ -1,0 +1,22 @@
+{
+  "id": "023-invoices-issued-in-month",
+  "request": "Acme invoices issued in September",
+  "now": "2026-10-07T12:00:00Z",
+  "tags": ["table", "sort-key", "date-range", "relative-date"],
+  "ir": {
+    "entity": "invoices",
+    "conditions": [
+      {"field": "organization_id", "operator": "eq", "value": "acme"},
+      {"field": "issued_at", "operator": "between", "value": ["2026-09-01", "2026-09-30"]}
+    ]
+  },
+  "expect": {
+    "status": "valid",
+    "table": "invoices",
+    "query": {
+      "KeyConditionExpression": "#n0 = :v0 AND #n1 BETWEEN :v1 AND :v2",
+      "ExpressionAttributeNames": {"#n0": "organization_id", "#n1": "issued_at"},
+      "ExpressionAttributeValues": {":v0": "acme", ":v1": "2026-09-01T00:00:00Z", ":v2": "2026-09-30T23:59:59Z"}
+    }
+  }
+}

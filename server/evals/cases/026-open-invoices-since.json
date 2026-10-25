@@ -1,0 +1,23 @@
+{
+  "id": "026-open-invoices-since",
+  "request": "Open invoices issued since October 1st",
+  "now": "2026-10-07T12:00:00Z",
+  "tags": ["gsi", "sort-key", "date-range", "relative-date"],
+  "ir": {
+    "entity": "invoices",
+    "conditions": [
+      {"field": "status", "operator": "eq", "value": "open"},
+      {"field": "issued_at", "operator": "gte", "value": "2026-10-01"}
+    ]
+  },
+  "expect": {
+    "status": "valid",
+    "table": "invoices",
+    "index": "status-issued-at-index",
+    "query": {
+      "KeyConditionExpression": "#n0 = :v0 AND #n1 >= :v1",
+      "ExpressionAttributeNames": {"#n0": "status", "#n1": "issued_at"},
+      "ExpressionAttributeValues": {":v0": "open", ":v1": "2026-10-01T00:00:00Z"}
+    }
+  }
+}

@@ -1,0 +1,24 @@
+{
+  "id": "012-plan-organizations-in-country",
+  "request": "Free plan organizations in the US",
+  "now": "2026-10-07T12:00:00Z",
+  "tags": ["gsi", "filter"],
+  "ir": {
+    "entity": "organizations",
+    "conditions": [
+      {"field": "plan", "operator": "eq", "value": "free"},
+      {"field": "country", "operator": "eq", "value": "US"}
+    ]
+  },
+  "expect": {
+    "status": "valid",
+    "table": "organizations",
+    "index": "plan-created-at-index",
+    "query": {
+      "KeyConditionExpression": "#n0 = :v0",
+      "FilterExpression": "(#n1 = :v1)",
+      "ExpressionAttributeNames": {"#n0": "plan", "#n1": "country"},
+      "ExpressionAttributeValues": {":v0": "free", ":v1": "US"}
+    }
+  }
+}

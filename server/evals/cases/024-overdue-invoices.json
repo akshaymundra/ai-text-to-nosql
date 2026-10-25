@@ -1,0 +1,22 @@
+{
+  "id": "024-overdue-invoices",
+  "request": "Show all overdue invoices",
+  "now": "2026-10-07T12:00:00Z",
+  "tags": ["gsi"],
+  "ir": {
+    "entity": "invoices",
+    "conditions": [
+      {"field": "status", "operator": "eq", "value": "overdue"}
+    ]
+  },
+  "expect": {
+    "status": "valid",
+    "table": "invoices",
+    "index": "status-issued-at-index",
+    "query": {
+      "KeyConditionExpression": "#n0 = :v0",
+      "ExpressionAttributeNames": {"#n0": "status"},
+      "ExpressionAttributeValues": {":v0": "overdue"}
+    }
+  }
+}

@@ -1,0 +1,25 @@
+{
+  "id": "020-assigned-high-priority-not-done",
+  "request": "High priority tasks assigned to u_002 that are not done",
+  "now": "2026-10-07T12:00:00Z",
+  "tags": ["gsi", "filter", "ne"],
+  "ir": {
+    "entity": "tasks",
+    "conditions": [
+      {"field": "assignee_id", "operator": "eq", "value": "u_002"},
+      {"field": "priority", "operator": "eq", "value": "high"},
+      {"field": "status", "operator": "ne", "value": "done"}
+    ]
+  },
+  "expect": {
+    "status": "valid",
+    "table": "tasks",
+    "index": "assignee-due-date-index",
+    "query": {
+      "KeyConditionExpression": "#n0 = :v0",
+      "FilterExpression": "(#n1 = :v1) AND (#n2 <> :v2)",
+      "ExpressionAttributeNames": {"#n0": "assignee_id", "#n1": "priority", "#n2": "status"},
+      "ExpressionAttributeValues": {":v0": "u_002", ":v1": "high", ":v2": "done"}
+    }
+  }
+}

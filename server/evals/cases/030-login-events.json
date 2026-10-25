@@ -1,0 +1,23 @@
+{
+  "id": "030-login-events",
+  "request": "Login events at acme",
+  "now": "2026-10-07T12:00:00Z",
+  "tags": ["table", "filter"],
+  "ir": {
+    "entity": "audit_logs",
+    "conditions": [
+      {"field": "organization_id", "operator": "eq", "value": "acme"},
+      {"field": "action", "operator": "eq", "value": "user.login"}
+    ]
+  },
+  "expect": {
+    "status": "valid",
+    "table": "audit_logs",
+    "query": {
+      "KeyConditionExpression": "#n0 = :v0",
+      "FilterExpression": "(#n1 = :v1)",
+      "ExpressionAttributeNames": {"#n0": "organization_id", "#n1": "action"},
+      "ExpressionAttributeValues": {":v0": "acme", ":v1": "user.login"}
+    }
+  }
+}

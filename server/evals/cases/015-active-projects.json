@@ -1,0 +1,23 @@
+{
+  "id": "015-active-projects",
+  "request": "Active projects in acme",
+  "now": "2026-10-07T12:00:00Z",
+  "tags": ["table", "filter", "reserved-word"],
+  "ir": {
+    "entity": "projects",
+    "conditions": [
+      {"field": "organization_id", "operator": "eq", "value": "acme"},
+      {"field": "status", "operator": "eq", "value": "active"}
+    ]
+  },
+  "expect": {
+    "status": "valid",
+    "table": "projects",
+    "query": {
+      "KeyConditionExpression": "#n0 = :v0",
+      "FilterExpression": "(#n1 = :v1)",
+      "ExpressionAttributeNames": {"#n0": "organization_id", "#n1": "status"},
+      "ExpressionAttributeValues": {":v0": "acme", ":v1": "active"}
+    }
+  }
+}

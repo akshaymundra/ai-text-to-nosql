@@ -1,0 +1,23 @@
+{
+  "id": "025-invoices-over-amount",
+  "request": "Acme invoices over 5000",
+  "now": "2026-10-07T12:00:00Z",
+  "tags": ["table", "filter", "number"],
+  "ir": {
+    "entity": "invoices",
+    "conditions": [
+      {"field": "organization_id", "operator": "eq", "value": "acme"},
+      {"field": "amount", "operator": "gt", "value": 5000}
+    ]
+  },
+  "expect": {
+    "status": "valid",
+    "table": "invoices",
+    "query": {
+      "KeyConditionExpression": "#n0 = :v0",
+      "FilterExpression": "(#n1 > :v1)",
+      "ExpressionAttributeNames": {"#n0": "organization_id", "#n1": "amount"},
+      "ExpressionAttributeValues": {":v0": "acme", ":v1": 5000}
+    }
+  }
+}

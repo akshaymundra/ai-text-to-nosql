@@ -1,0 +1,23 @@
+{
+  "id": "018-tasks-of-project-by-status",
+  "request": "Todo tasks in project p_002",
+  "now": "2026-10-07T12:00:00Z",
+  "tags": ["gsi", "sort-key", "tie-break"],
+  "ir": {
+    "entity": "tasks",
+    "conditions": [
+      {"field": "project_id", "operator": "eq", "value": "p_002"},
+      {"field": "status", "operator": "eq", "value": "todo"}
+    ]
+  },
+  "expect": {
+    "status": "valid",
+    "table": "tasks",
+    "index": "project-status-index",
+    "query": {
+      "KeyConditionExpression": "#n0 = :v0 AND #n1 = :v1",
+      "ExpressionAttributeNames": {"#n0": "project_id", "#n1": "status"},
+      "ExpressionAttributeValues": {":v0": "p_002", ":v1": "todo"}
+    }
+  }
+}
