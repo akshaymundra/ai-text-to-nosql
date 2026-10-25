@@ -9,55 +9,64 @@ The eval set is the only proof that the LLM stage works. Unit tests cover the de
 
 ## Layout and format
 
-One JSON file per case in `server/evals/cases/`, named `<nnn>-<slug>.json`:
+Go package `server/evals/` (`evals.go`: `Case`, `Outcome`, `LoadCases`, `OutcomeOf`). One JSON file per case in `server/evals/cases/`, named `<nnn>-<slug>.json`; unknown keys fail loading, so a typo cannot pass silently.
 
 ```json
 {
-  "id": "014-active-acme-users-last-month",
+  "id": "001-active-acme-users-last-month",
   "request": "Get active users from acme who signed up last month",
   "now": "2026-10-07T12:00:00Z",
   "tags": ["gsi", "filter", "relative-date"],
+  "ir": {
+    "entity": "users",
+    "conditions": [
+      {"field": "organization_id", "operator": "eq", "value": "acme"},
+      {"field": "created_at", "operator": "between", "value": ["2026-09-01", "2026-09-30"]},
+      {"field": "status", "operator": "eq", "value": "active"}
+    ]
+  },
   "expect": {
     "status": "valid",
     "table": "users",
     "index": "organization-created-at-index",
     "query": {
       "KeyConditionExpression": "#n0 = :v0 AND #n1 BETWEEN :v1 AND :v2",
-      "FilterExpression": "#n2 = :v3",
-      "ExpressionAttributeNames": { "#n0": "organization_id", "#n1": "created_at", "#n2": "status" },
-      "ExpressionAttributeValues": { ":v0": "acme", ":v1": "2026-09-01T00:00:00Z", ":v2": "2026-09-30T23:59:59Z", ":v3": "active" }
+      "FilterExpression": "(#n2 = :v3)",
+      "ExpressionAttributeNames": {"#n0": "organization_id", "#n1": "created_at", "#n2": "status"},
+      "ExpressionAttributeValues": {":v0": "acme", ":v1": "2026-09-01T00:00:00Z", ":v2": "2026-09-30T23:59:59Z", ":v3": "active"}
     }
   }
 }
 ```
 
-A rejection case:
+A rejection case (`field` only when the rejection names one; `SCAN_REQUIRED` does not):
 
 ```json
-{
-  "id": "021-email-contains-gmail",
-  "request": "Find users whose email contains gmail",
-  "now": "2026-10-07T12:00:00Z",
-  "tags": ["reject", "scan"],
-  "expect": { "status": "rejected", "code": "SCAN_REQUIRED" }
-}
+"expect": {"status": "rejected", "code": "INVALID_KEY_CONDITION", "field": "project_id"}
 ```
 
 Rules:
-- `ExpressionAttributeValues` are written as plain JSON values; the harness unmarshals the compiled `AttributeValue`s before comparing. Comparison is exact, which relies on the compiler's deterministic placeholder naming.
-- `now` is fixed per case. Relative dates resolve against it, never the wall clock.
-- Rejection `code` must be a code the validator defines in `internal/constants`. Do not invent codes in a case; add the code to the validator first.
-- Expected values come from data in `server/schemas-local/` so a valid case also returns rows when executed against DynamoDB Local.
-- Mix: valid table-key queries, valid GSI queries, filtered queries, unknown fields, scan-required requests, invalid sort-key operators, relative dates. Target 30 to 50 cases.
+- `ir` is the reference IR: what a correct extraction produces, with relative dates resolved against `now` and dates left as written (`"2026-09-01"`; the `dates` stage widens them). For a rejection case it is the honest IR of the request, which the pipeline then rejects. Never write an IR that only a wrong extraction would produce.
+- So no case expects `UNKNOWN_TABLE` (extraction enums make it impossible) or `MULTIPLE_KEY_CONDITIONS` (the honest IR for a range is one `between`); unit tests cover those codes.
+- `expect` is written by hand from the planner and compiler rules, never copied from pipeline output, or the case proves nothing.
+- `ExpressionAttributeValues` are plain JSON values; `OutcomeOf` converts the compiled `{"S": ...}` / `{"N": ...}` before comparing. Filters are each parenthesised. Comparison is exact and relies on deterministic placeholder naming. `Limit` and warnings are not compared.
+- Only the first rejection is compared (`code`, and `field` when present).
+- Rejection `code` must exist in `internal/constants`. Do not invent codes in a case.
+- `now` is fixed per case (all current cases use `2026-10-07T12:00:00Z`). Relative dates resolve against it, never the wall clock.
+- Values come from `server/schemas-local/` data, so a valid case also returns rows when executed against DynamoDB Local.
+- Tags name what a case exercises (`gsi`, `table`, `sort-key`, `filter`, `date-range`, `relative-date`, `tie-break`, `reject`, `scan`, ...), so scores can be reported per feature. Reuse existing tags before adding new ones.
+- Current set: `001`-`030` valid, `031`-`045` rejected. Target 30 to 50 cases; grow it when a bug or a new feature needs one.
 
 ## Running
 
 ```sh
-make eval            # needs local Ollama running with the configured model
+make test                       # includes go test ./evals: reference IR -> BuildQuery -> compare with expect, no LLM
+go test -run TestCases -v ./evals   # per-case PASS/FAIL
+make eval                       # step 5, not built yet: request -> Ollama extraction -> BuildQuery -> compare
 ```
 
-- Prints one line per case (`PASS`/`FAIL`, id, and on failure the extracted IR plus expected vs actual) and a total score.
-- On failure, the extracted IR tells you where it broke: wrong IR = extraction (prompt/model); right IR but wrong query = planner/compiler bug, which needs a unit test too.
+- `TestCases` proves every `expect` against the real schemas before any LLM is involved. A failure there is a wrong case or a pipeline regression, never the model.
+- `make eval` (planned) reuses `LoadCases` and `OutcomeOf`, and also diffs the extracted IR against `ir`: wrong IR = extraction (prompt/model); right IR but wrong query = planner/compiler bug, which needs a unit test too. It prints one line per case, a total score and a score per tag.
 - Ollama settings are part of the result: pinned model tag, `temperature: 0`, fixed `seed`. Structured output via the `format` JSON schema works with **local Ollama only**; Ollama Cloud does not support it, so cloud runs score extraction without schema enforcement.
 
 ## Workflow rules
