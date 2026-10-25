@@ -2,13 +2,13 @@
   "id": "045-projects-due-this-month",
   "request": "Acme projects due this month",
   "now": "2026-10-07T12:00:00Z",
-  "tags": ["reject", "unknown-field"],
+  "tags": ["reject", "scan", "table-choice", "relative-date"],
   "ir": {
-    "entity": "projects",
+    "entity": "tasks",
     "conditions": [
       {"field": "organization_id", "operator": "eq", "value": "acme"},
       {"field": "due_date", "operator": "between", "value": ["2026-10-01", "2026-10-31"]}
     ]
   },
-  "expect": {"status": "rejected", "code": "UNKNOWN_FIELD", "field": "due_date"}
+  "expect": {"status": "rejected", "code": "SCAN_REQUIRED"}
 }
