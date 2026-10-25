@@ -8,7 +8,9 @@ import (
 
 	"github.com/akshaymundra/ai-text-to-nosql/internal/config"
 	"github.com/akshaymundra/ai-text-to-nosql/internal/routes"
+	"github.com/jackc/pgx/v5"
 	"github.com/jackc/pgx/v5/pgxpool"
+	pgxvec "github.com/pgvector/pgvector-go/pgx"
 	"go.uber.org/zap"
 )
 
@@ -43,7 +45,15 @@ func (a *App) Close() {
 }
 
 func newPostgresPool(ctx context.Context, url string, pingTimeout time.Duration) (*pgxpool.Pool, error) {
-	pool, err := pgxpool.New(ctx, url)
+	poolConfig, err := pgxpool.ParseConfig(url)
+	if err != nil {
+		return nil, fmt.Errorf("parsing postgres url: %w", err)
+	}
+	poolConfig.AfterConnect = func(ctx context.Context, conn *pgx.Conn) error {
+		return pgxvec.RegisterTypes(ctx, conn)
+	}
+
+	pool, err := pgxpool.NewWithConfig(ctx, poolConfig)
 	if err != nil {
 		return nil, fmt.Errorf("creating postgres pool: %w", err)
 	}
