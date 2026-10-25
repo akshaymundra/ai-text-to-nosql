@@ -4,13 +4,13 @@
   "partitionKey": "project_id",
   "sortKey": "task_id",
   "attributes": [
-    { "name": "project_id", "type": "string", "description": "ID of the project the task belongs to." },
+    { "name": "project_id", "type": "string", "description": "ID of the project the task belongs to (e.g. p_001)." },
     { "name": "task_id", "type": "string", "description": "Unique task ID (e.g. t_001)." },
-    { "name": "organization_id", "type": "string", "description": "ID of the organization that owns the project." },
+    { "name": "organization_id", "type": "string", "description": "ID of the organization that owns the project (e.g. acme)." },
     { "name": "title", "type": "string", "description": "Short task title." },
     { "name": "status", "type": "string", "description": "Task status: todo, in_progress or done." },
     { "name": "priority", "type": "string", "description": "Task priority: low, medium or high." },
-    { "name": "assignee_id", "type": "string", "description": "User ID of the person assigned to the task." },
+    { "name": "assignee_id", "type": "string", "description": "User ID of the person assigned to the task (e.g. u_001)." },
     { "name": "due_date", "type": "string", "format": "date", "description": "Due date in YYYY-MM-DD format." },
     { "name": "created_at", "type": "string", "format": "timestamp", "description": "ISO 8601 timestamp when the task was created." }
   ],

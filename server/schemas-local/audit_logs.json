@@ -4,12 +4,12 @@
   "partitionKey": "organization_id",
   "sortKey": "created_at",
   "attributes": [
-    { "name": "organization_id", "type": "string", "description": "ID of the organization the event belongs to." },
+    { "name": "organization_id", "type": "string", "description": "ID of the organization the event belongs to (e.g. acme)." },
     { "name": "created_at", "type": "string", "format": "timestamp", "description": "ISO 8601 timestamp when the event happened." },
-    { "name": "actor_id", "type": "string", "description": "User ID of the user who performed the action." },
+    { "name": "actor_id", "type": "string", "description": "User ID of the user who performed the action (e.g. u_001)." },
     { "name": "action", "type": "string", "description": "Event type: user.login, user.invite, user.disable, project.create or task.update." },
     { "name": "resource_type", "type": "string", "description": "Type of the affected resource: user, project or task." },
-    { "name": "resource_id", "type": "string", "description": "ID of the affected resource." }
+    { "name": "resource_id", "type": "string", "description": "ID of the affected resource (e.g. u_001, p_001 or t_001)." }
   ],
   "indexes": [
     { "name": "actor-created-at-index", "partitionKey": "actor_id", "sortKey": "created_at" }

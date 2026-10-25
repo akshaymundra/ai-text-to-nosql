@@ -4,9 +4,9 @@
   "partitionKey": "user_id",
   "attributes": [
     { "name": "user_id", "type": "string", "description": "Unique user ID (e.g. u_001)." },
-    { "name": "organization_id", "type": "string", "description": "ID of the organization the user belongs to." },
+    { "name": "organization_id", "type": "string", "description": "ID of the organization the user belongs to (e.g. acme)." },
     { "name": "email", "type": "string", "description": "User email address." },
-    { "name": "name", "type": "string", "description": "Full name of the user." },
+    { "name": "name", "type": "string", "description": "Full name of the user (e.g. Alice Shah). Not the short ID: that is user_id." },
     { "name": "role", "type": "string", "description": "Role in the organization: admin, member or viewer." },
     { "name": "status", "type": "string", "description": "Account status: active, invited or disabled." },
     { "name": "created_at", "type": "string", "format": "timestamp", "description": "ISO 8601 timestamp when the user signed up." },

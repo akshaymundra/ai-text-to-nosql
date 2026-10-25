@@ -4,11 +4,11 @@
   "partitionKey": "organization_id",
   "sortKey": "project_id",
   "attributes": [
-    { "name": "organization_id", "type": "string", "description": "ID of the organization that owns the project." },
+    { "name": "organization_id", "type": "string", "description": "ID of the organization that owns the project (e.g. acme)." },
     { "name": "project_id", "type": "string", "description": "Unique project ID (e.g. p_001)." },
-    { "name": "name", "type": "string", "description": "Project name." },
+    { "name": "name", "type": "string", "description": "Display name of the project (e.g. Website Redesign). Not the short ID: that is project_id." },
     { "name": "status", "type": "string", "description": "Project status: active or archived." },
-    { "name": "owner_id", "type": "string", "description": "User ID of the project owner." },
+    { "name": "owner_id", "type": "string", "description": "User ID of the project owner (e.g. u_001)." },
     { "name": "created_at", "type": "string", "format": "timestamp", "description": "ISO 8601 timestamp when the project was created." }
   ],
   "indexes": [

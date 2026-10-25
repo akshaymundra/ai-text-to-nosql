@@ -4,7 +4,7 @@
   "partitionKey": "organization_id",
   "attributes": [
     { "name": "organization_id", "type": "string", "description": "Unique organization ID, lowercase slug of the name (e.g. acme)." },
-    { "name": "name", "type": "string", "description": "Display name of the organization." },
+    { "name": "name", "type": "string", "description": "Display name of the organization (e.g. Acme Corp). Not the short ID: that is organization_id." },
     { "name": "plan", "type": "string", "description": "Subscription plan: free, pro or enterprise." },
     { "name": "status", "type": "string", "description": "Account status: active or suspended." },
     { "name": "country", "type": "string", "description": "ISO 3166-1 alpha-2 country code." },

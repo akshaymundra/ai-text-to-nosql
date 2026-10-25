@@ -4,7 +4,7 @@
   "partitionKey": "organization_id",
   "sortKey": "issued_at",
   "attributes": [
-    { "name": "organization_id", "type": "string", "description": "ID of the billed organization." },
+    { "name": "organization_id", "type": "string", "description": "ID of the billed organization (e.g. acme)." },
     { "name": "issued_at", "type": "string", "format": "timestamp", "description": "ISO 8601 timestamp when the invoice was issued." },
     { "name": "invoice_id", "type": "string", "description": "Invoice number (e.g. inv_001)." },
     { "name": "amount", "type": "number", "description": "Invoice total in the invoice currency." },
