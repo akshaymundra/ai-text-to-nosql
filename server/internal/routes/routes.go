@@ -11,6 +11,7 @@ import (
 	"go.uber.org/zap"
 
 	"github.com/akshaymundra/ai-text-to-nosql/internal/config"
+	"github.com/akshaymundra/ai-text-to-nosql/internal/integrations/ollama"
 	appmiddleware "github.com/akshaymundra/ai-text-to-nosql/internal/middleware"
 	"github.com/akshaymundra/ai-text-to-nosql/internal/repo"
 	"github.com/akshaymundra/ai-text-to-nosql/internal/service"
@@ -57,6 +58,12 @@ func registerRoutes(logger *zap.Logger, db *pgxpool.Pool, cfg *config.Config) fu
 		cfg.JWTTTL,
 		allowLocalConnection,
 	)
+	ollamaClient := ollama.NewClient(cfg.OllamaURL, cfg.OllamaTimeout)
+	tableSchemaService := service.NewTableSchemaService(
+		repo.NewTableSchemaRepo(db),
+		ollamaClient,
+		cfg.EmbeddingModel,
+	)
 
 	return func(r chi.Router) {
 		r.Route("/auth", AuthRoutes(authService, logger))
@@ -64,7 +71,7 @@ func registerRoutes(logger *zap.Logger, db *pgxpool.Pool, cfg *config.Config) fu
 		r.Group(func(r chi.Router) {
 			r.Use(appmiddleware.Authenticate(authService, logger))
 			r.Route("/workspace", WorkspaceRoutes(logger, allowLocalConnection))
-			r.Route("/schemas", TableSchemaRoutes(logger))
+			r.Route("/schemas", TableSchemaRoutes(tableSchemaService, logger))
 			r.Route("/queries", QueryRoutes(logger))
 		})
 	}

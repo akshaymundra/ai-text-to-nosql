@@ -8,8 +8,7 @@ import (
 	"github.com/akshaymundra/ai-text-to-nosql/internal/service"
 )
 
-func TableSchemaRoutes(logger *zap.Logger) func(router chi.Router) {
-	svc := service.NewTableSchemaService()
+func TableSchemaRoutes(svc *service.TableSchemaService, logger *zap.Logger) func(router chi.Router) {
 	h := handler.NewTableSchemaHandler(svc, logger)
 	return func(r chi.Router) {
 		r.Get("/", h.List)
