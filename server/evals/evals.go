@@ -27,6 +27,12 @@ type Case struct {
 	Expect        Outcome  `json:"expect"`
 }
 
+// Extraction is the part of a run the model is responsible for, shaped like the case file so the two compare.
+type Extraction struct {
+	IR            ir.Query `json:"ir"`
+	UnmappedTerms []string `json:"unmapped_terms,omitempty"`
+}
+
 type Outcome struct {
 	Status model.QueryStatus       `json:"status"`
 	Code   constants.RejectionCode `json:"code,omitempty"`

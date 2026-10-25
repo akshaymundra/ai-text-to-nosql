@@ -12,6 +12,10 @@ import (
 	"github.com/akshaymundra/ai-text-to-nosql/internal/service/ir"
 )
 
+// A real answer is 50 to 150 tokens. Constrained JSON output can loop (repeating conditions forever); the cap ends
+// such an answer with done_reason "length", which becomes EXTRACTION_FAILED instead of a request that hangs.
+const maxAnswerTokens = 512
+
 // Extract asks the model for the request's IR. An unusable answer is a rejection, never a retry: retries would
 // make results depend on luck and hide prompt problems the eval set should show.
 func (e *Extractor) Extract(
@@ -35,7 +39,7 @@ func (e *Extractor) Extract(
 			{Role: ollama.RoleUser, Content: request},
 		},
 		Format:  schema,
-		Options: ollama.Options{Temperature: 0, Seed: e.seed},
+		Options: ollama.Options{Temperature: 0, Seed: e.seed, NumPredict: maxAnswerTokens},
 	})
 	if errors.Is(err, ollama.ErrIncompleteAnswer) {
 		return extraction.Extraction{}, &ir.Rejection{Code: constants.RejectCodeExtractionFailed}, nil

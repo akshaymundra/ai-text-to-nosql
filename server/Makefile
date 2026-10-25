@@ -5,7 +5,7 @@ BINARY=bin/$(SERVICE)
 MIGRATIONS_DIR=migrations
 GOOSE=go tool goose -dir $(MIGRATIONS_DIR) postgres "$(DATABASE_URL)"
 
-.PHONY: build run test lint clean seed register-demo eval-retrieval migrate-create migrate-up migrate-down migrate-status
+.PHONY: build run test lint clean seed register-demo eval-retrieval eval migrate-create migrate-up migrate-down migrate-status
 
 build:
 	go build -o $(BINARY) ./cmd/$(SERVICE)
@@ -30,6 +30,9 @@ register-demo:
 
 eval-retrieval:
 	go run ./cmd/eval-retrieval
+
+eval:
+	go run ./cmd/eval
 
 migrate-create:
 	$(if $(name),,$(error usage: make migrate-create name=<snake_case_name>))

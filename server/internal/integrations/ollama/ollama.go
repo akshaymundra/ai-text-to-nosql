@@ -40,6 +40,7 @@ type Message struct {
 type Options struct {
 	Temperature float64 `json:"temperature"`
 	Seed        int     `json:"seed"`
+	NumPredict  int     `json:"num_predict,omitempty"`
 }
 
 // ChatRequest asks for one non-streamed answer. Format is a JSON schema the answer must follow.

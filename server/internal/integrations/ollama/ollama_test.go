@@ -117,7 +117,7 @@ func TestChat(t *testing.T) {
 			{Role: RoleUser, Content: "Get active users"},
 		},
 		Format:  json.RawMessage(`{"type": "object"}`),
-		Options: Options{Temperature: 0, Seed: 42},
+		Options: Options{Temperature: 0, Seed: 42, NumPredict: 512},
 	})
 	if err != nil {
 		t.Fatalf("chat: %v", err)
@@ -132,7 +132,7 @@ func TestChat(t *testing.T) {
 		"format":  map[string]any{"type": "object"},
 		"stream":  false,
 		"think":   false,
-		"options": map[string]any{"temperature": float64(0), "seed": float64(42)},
+		"options": map[string]any{"temperature": float64(0), "seed": float64(42), "num_predict": float64(512)},
 	}
 	if diff := cmp.Diff(wantBody, gotBody); diff != "" {
 		t.Errorf("request body mismatch (-want +got):\n%s", diff)

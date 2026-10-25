@@ -52,7 +52,7 @@ func TestExtract(t *testing.T) {
 			{Role: ollama.RoleUser, Content: "Active users"},
 		},
 		Format:  wantSchema,
-		Options: ollama.Options{Temperature: 0, Seed: 42},
+		Options: ollama.Options{Temperature: 0, Seed: 42, NumPredict: maxAnswerTokens},
 	}
 	if diff := cmp.Diff(wantRequest, chat.gotRequest); diff != "" {
 		t.Errorf("chat request mismatch (-want +got):\n%s", diff)
