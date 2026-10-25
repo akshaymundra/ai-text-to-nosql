@@ -14,7 +14,7 @@ import (
 
 // PromptVersion is stored with every query so eval scores and saved queries can be traced to the prompt that
 // produced them. Bump it whenever the prompt or schema below changes.
-const PromptVersion = "extraction-v1"
+const PromptVersion = "extraction-v2"
 
 const rules = `You turn a request for data into a JSON description of the filters it asks for. You never write database queries.
 
@@ -32,11 +32,16 @@ Operators:
 - exists, not_exists: the field is present or missing; no value.
 
 Rules:
-- Copy values exactly as the request or the field description spells them, for example "overdue" or "u_002". Never translate or invent values.
+- Every identifier or name the request mentions (an organization, a user, a project, an ID like x_123) becomes a condition. Never drop one.
+- A value shaped like a field's ID examples (a lowercase slug, a prefixed code) filters that ID field, not a name or title field.
+- Copy values exactly as the request or the field description spells them. Never translate or invent values.
 - Numbers are JSON numbers; text is a JSON string.
-- Fields with a date or timestamp format take whole days as YYYY-MM-DD. Use YYYY-MM-DDTHH:MM:SSZ only when the request names a time of day.
-- Resolve relative dates ("last month", "since Monday", "today") against today's date.
+- Dates: write whole days as YYYY-MM-DD and never add a time or time zone to them; the system does that. Use YYYY-MM-DDTHH:MM:SSZ only when the request names a time of day.
+- A named period (a day, a month, a quarter, a year, last week, the previous month) covers the whole calendar period: use between with its first and last day. The previous month means the previous calendar month, not the last 30 days.
+- Use gte, gt, lte or lt only for open ranges ("since", "after", "before", "until").
+- Resolve relative dates against today's date.
 - A range on one field is one between condition, never two conditions.
+- exists and not_exists take no value: leave value out.
 - Add no condition the request does not state. Sorting and result limits are not part of the output.`
 
 type Extraction struct {
@@ -105,6 +110,13 @@ func Parse(content string) (Extraction, error) {
 	}
 	if a.Entity == "" {
 		return Extraction{}, errors.New("parsing extraction: entity is missing")
+	}
+	for i, c := range a.Conditions {
+		// The schema cannot tie value to the operator, so a model sometimes sends "value": "" with exists.
+		// The operator takes no value, so dropping it changes nothing the request asked for.
+		if rule, ok := c.Operator.Rule(); ok && rule.Arity == ir.ArityNone {
+			a.Conditions[i].Value = nil
+		}
 	}
 	return Extraction{
 		Query:         ir.Query{Entity: a.Entity, Conditions: a.Conditions},

@@ -122,7 +122,7 @@ func TestParse(t *testing.T) {
 		"conditions": [
 			{"field": "status", "operator": "eq", "value": "active"},
 			{"field": "created_at", "operator": "between", "value": ["2026-09-01", "2026-09-30"]},
-			{"field": "last_login_at", "operator": "not_exists"}
+			{"field": "last_login_at", "operator": "not_exists", "value": ""}
 		],
 		"unmapped_terms": ["phone number"]
 	}`
