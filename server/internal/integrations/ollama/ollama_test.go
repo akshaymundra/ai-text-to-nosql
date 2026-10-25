@@ -3,6 +3,7 @@ package ollama
 import (
 	"context"
 	"encoding/json"
+	"errors"
 	"net/http"
 	"net/http/httptest"
 	"strings"
@@ -143,10 +144,11 @@ func TestChat(t *testing.T) {
 
 func TestChatErrors(t *testing.T) {
 	tests := []struct {
-		name    string
-		status  int
-		body    string
-		wantErr string
+		name           string
+		status         int
+		body           string
+		wantErr        string
+		wantIncomplete bool
 	}{
 		{
 			name:    "error status carries ollama's message",
@@ -155,16 +157,18 @@ func TestChatErrors(t *testing.T) {
 			wantErr: "not found, try pulling it first",
 		},
 		{
-			name:    "output cut off by the token limit",
-			status:  http.StatusOK,
-			body:    `{"message": {"role": "assistant", "content": "{\"entity\":"}, "done": true, "done_reason": "length"}`,
-			wantErr: `stopped early: "length"`,
+			name:           "output cut off by the token limit",
+			status:         http.StatusOK,
+			body:           `{"message": {"role": "assistant", "content": "{\"entity\":"}, "done": true, "done_reason": "length"}`,
+			wantErr:        `stopped early: "length"`,
+			wantIncomplete: true,
 		},
 		{
-			name:    "empty content",
-			status:  http.StatusOK,
-			body:    `{"message": {"role": "assistant", "content": ""}, "done": true, "done_reason": "stop"}`,
-			wantErr: "empty response",
+			name:           "empty content",
+			status:         http.StatusOK,
+			body:           `{"message": {"role": "assistant", "content": ""}, "done": true, "done_reason": "stop"}`,
+			wantErr:        "empty response",
+			wantIncomplete: true,
 		},
 	}
 
@@ -179,6 +183,9 @@ func TestChatErrors(t *testing.T) {
 			_, err := NewClient(server.URL, time.Second).Chat(context.Background(), ChatRequest{Model: "m"})
 			if err == nil || !strings.Contains(err.Error(), tc.wantErr) {
 				t.Fatalf("err = %v, want it to contain %q", err, tc.wantErr)
+			}
+			if errors.Is(err, ErrIncompleteAnswer) != tc.wantIncomplete {
+				t.Errorf("errors.Is(err, ErrIncompleteAnswer) = %v, want %v", !tc.wantIncomplete, tc.wantIncomplete)
 			}
 		})
 	}

@@ -3,6 +3,7 @@ package config
 import (
 	"fmt"
 	"os"
+	"strconv"
 	"strings"
 	"sync"
 	"time"
@@ -11,15 +12,17 @@ import (
 )
 
 type Config struct {
-	ServerPort     string
-	AppEnv         string
-	DatabaseURL    string
-	DBPingTimeout  time.Duration
-	JWTSecret      string
-	JWTTTL         time.Duration
-	OllamaURL      string
-	OllamaTimeout  time.Duration
-	EmbeddingModel string
+	ServerPort      string
+	AppEnv          string
+	DatabaseURL     string
+	DBPingTimeout   time.Duration
+	JWTSecret       string
+	JWTTTL          time.Duration
+	OllamaURL       string
+	OllamaTimeout   time.Duration
+	EmbeddingModel  string
+	ExtractionModel string
+	ExtractionSeed  int
 
 	DynamoDBEndpoint      string
 	DynamoDBRegion        string
@@ -43,15 +46,17 @@ func Init() {
 	once.Do(func() {
 		_ = godotenv.Load()
 		instance = &Config{
-			ServerPort:     getEnv("SERVER_PORT", "3000"),
-			AppEnv:         getEnv("APP_ENV", EnvDevelopment),
-			DatabaseURL:    getEnv("DATABASE_URL", ""),
-			DBPingTimeout:  getDurationEnv("DB_PING_TIMEOUT", 5*time.Second),
-			JWTSecret:      os.Getenv("JWT_SECRET"),
-			JWTTTL:         getDurationEnv("JWT_TTL", 24*time.Hour),
-			OllamaURL:      getEnv("OLLAMA_URL", "http://localhost:11434"),
-			OllamaTimeout:  getDurationEnv("OLLAMA_TIMEOUT", 60*time.Second),
-			EmbeddingModel: getEnv("EMBEDDING_MODEL", "qwen3-embedding:0.6b"),
+			ServerPort:      getEnv("SERVER_PORT", "3000"),
+			AppEnv:          getEnv("APP_ENV", EnvDevelopment),
+			DatabaseURL:     getEnv("DATABASE_URL", ""),
+			DBPingTimeout:   getDurationEnv("DB_PING_TIMEOUT", 5*time.Second),
+			JWTSecret:       os.Getenv("JWT_SECRET"),
+			JWTTTL:          getDurationEnv("JWT_TTL", 24*time.Hour),
+			OllamaURL:       getEnv("OLLAMA_URL", "http://localhost:11434"),
+			OllamaTimeout:   getDurationEnv("OLLAMA_TIMEOUT", 60*time.Second),
+			EmbeddingModel:  getEnv("EMBEDDING_MODEL", "qwen3-embedding:0.6b"),
+			ExtractionModel: getEnv("EXTRACTION_MODEL", "qwen3.5:9b"),
+			ExtractionSeed:  getIntEnv("EXTRACTION_SEED", 42),
 
 			DynamoDBEndpoint:      getEnv("DYNAMODB_ENDPOINT", "http://localhost:8081"),
 			DynamoDBRegion:        getEnv("DYNAMODB_REGION", "ap-south-1"),
@@ -84,6 +89,14 @@ func getEnv(key, fallback string) string {
 		return v
 	}
 	return fallback
+}
+
+func getIntEnv(key string, fallback int) int {
+	n, err := strconv.Atoi(os.Getenv(key))
+	if err != nil {
+		return fallback
+	}
+	return n
 }
 
 func getDurationEnv(key string, fallback time.Duration) time.Duration {

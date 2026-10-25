@@ -23,6 +23,10 @@ type embedResponse struct {
 	Embeddings [][]float32 `json:"embeddings"`
 }
 
+// ErrIncompleteAnswer means the model replied but the answer is unusable (cut off or empty), as opposed to
+// Ollama being unreachable or failing.
+var ErrIncompleteAnswer = errors.New("incomplete answer")
+
 const (
 	RoleSystem = "system"
 	RoleUser   = "user"
@@ -92,10 +96,10 @@ func (c *Client) Chat(ctx context.Context, req ChatRequest) (string, error) {
 		return "", fmt.Errorf("ollama chat: %w", withOllamaMessage(err))
 	}
 	if resp.DoneReason != "stop" {
-		return "", fmt.Errorf("ollama chat: stopped early: %q", resp.DoneReason)
+		return "", fmt.Errorf("ollama chat: %w: stopped early: %q", ErrIncompleteAnswer, resp.DoneReason)
 	}
 	if resp.Message.Content == "" {
-		return "", errors.New("ollama chat: empty response")
+		return "", fmt.Errorf("ollama chat: %w: empty response", ErrIncompleteAnswer)
 	}
 	return resp.Message.Content, nil
 }

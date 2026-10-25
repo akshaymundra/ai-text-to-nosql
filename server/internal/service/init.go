@@ -6,6 +6,7 @@ import (
 
 	"github.com/pgvector/pgvector-go"
 
+	"github.com/akshaymundra/ai-text-to-nosql/internal/integrations/ollama"
 	"github.com/akshaymundra/ai-text-to-nosql/internal/model"
 )
 
@@ -24,6 +25,10 @@ type accessPatternSearcher interface {
 		embeddingModel string,
 		limit int,
 	) ([]model.AccessPatternMatch, error)
+}
+
+type chatter interface {
+	Chat(ctx context.Context, req ollama.ChatRequest) (string, error)
 }
 
 type embedder interface {
@@ -68,6 +73,16 @@ func NewRetriever(patterns accessPatternSearcher, embedder embedder, embeddingMo
 		embedder:       embedder,
 		embeddingModel: embeddingModel,
 	}
+}
+
+type Extractor struct {
+	chat  chatter
+	model string
+	seed  int
+}
+
+func NewExtractor(chat chatter, model string, seed int) *Extractor {
+	return &Extractor{chat: chat, model: model, seed: seed}
 }
 
 type WorkspaceService struct {

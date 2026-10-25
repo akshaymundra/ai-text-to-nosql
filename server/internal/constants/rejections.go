@@ -15,6 +15,9 @@ const (
 	RejectCodeInvalidRange         RejectionCode = "INVALID_RANGE"
 	RejectCodeInvalidDateFormat    RejectionCode = "INVALID_DATE_FORMAT"
 
+	RejectCodeNoSchemas        RejectionCode = "NO_SCHEMAS"
+	RejectCodeExtractionFailed RejectionCode = "EXTRACTION_FAILED"
+
 	RejectCodeScanRequired          RejectionCode = "SCAN_REQUIRED"
 	RejectCodeInvalidKeyCondition   RejectionCode = "INVALID_KEY_CONDITION"
 	RejectCodeMultipleKeyConditions RejectionCode = "MULTIPLE_KEY_CONDITIONS"
