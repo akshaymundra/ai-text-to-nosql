@@ -1,0 +1,13 @@
+{
+  "id": "032-all-active-users",
+  "request": "All active users",
+  "now": "2026-10-07T12:00:00Z",
+  "tags": ["reject", "scan"],
+  "ir": {
+    "entity": "users",
+    "conditions": [
+      {"field": "status", "operator": "eq", "value": "active"}
+    ]
+  },
+  "expect": {"status": "rejected", "code": "SCAN_REQUIRED"}
+}

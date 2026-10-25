@@ -1,0 +1,13 @@
+{
+  "id": "039-tasks-title-contains",
+  "request": "Tasks whose title mentions report",
+  "now": "2026-10-07T12:00:00Z",
+  "tags": ["reject", "scan", "contains"],
+  "ir": {
+    "entity": "tasks",
+    "conditions": [
+      {"field": "title", "operator": "contains", "value": "report"}
+    ]
+  },
+  "expect": {"status": "rejected", "code": "SCAN_REQUIRED"}
+}

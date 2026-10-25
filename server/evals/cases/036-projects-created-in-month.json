@@ -1,0 +1,13 @@
+{
+  "id": "036-projects-created-in-month",
+  "request": "Projects created in September",
+  "now": "2026-10-07T12:00:00Z",
+  "tags": ["reject", "scan", "relative-date"],
+  "ir": {
+    "entity": "projects",
+    "conditions": [
+      {"field": "created_at", "operator": "between", "value": ["2026-09-01", "2026-09-30"]}
+    ]
+  },
+  "expect": {"status": "rejected", "code": "SCAN_REQUIRED"}
+}

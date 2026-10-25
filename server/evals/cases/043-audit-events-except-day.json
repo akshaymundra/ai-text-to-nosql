@@ -1,0 +1,14 @@
+{
+  "id": "043-audit-events-except-day",
+  "request": "Acme audit events except those on September 3",
+  "now": "2026-10-07T12:00:00Z",
+  "tags": ["reject", "date-format", "ne"],
+  "ir": {
+    "entity": "audit_logs",
+    "conditions": [
+      {"field": "organization_id", "operator": "eq", "value": "acme"},
+      {"field": "created_at", "operator": "ne", "value": "2026-09-03"}
+    ]
+  },
+  "expect": {"status": "rejected", "code": "INVALID_DATE_FORMAT", "field": "created_at"}
+}

@@ -1,0 +1,13 @@
+{
+  "id": "035-organizations-in-country",
+  "request": "Organizations based in Germany",
+  "now": "2026-10-07T12:00:00Z",
+  "tags": ["reject", "scan"],
+  "ir": {
+    "entity": "organizations",
+    "conditions": [
+      {"field": "country", "operator": "eq", "value": "DE"}
+    ]
+  },
+  "expect": {"status": "rejected", "code": "SCAN_REQUIRED"}
+}

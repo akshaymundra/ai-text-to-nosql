@@ -1,0 +1,13 @@
+{
+  "id": "037-tasks-due-tomorrow",
+  "request": "Tasks due tomorrow",
+  "now": "2026-10-07T12:00:00Z",
+  "tags": ["reject", "scan", "sort-key-only", "relative-date"],
+  "ir": {
+    "entity": "tasks",
+    "conditions": [
+      {"field": "due_date", "operator": "eq", "value": "2026-10-08"}
+    ]
+  },
+  "expect": {"status": "rejected", "code": "SCAN_REQUIRED"}
+}

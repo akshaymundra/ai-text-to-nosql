@@ -1,0 +1,13 @@
+{
+  "id": "040-audit-events-for-resource",
+  "request": "Audit events for task t_004",
+  "now": "2026-10-07T12:00:00Z",
+  "tags": ["reject", "scan"],
+  "ir": {
+    "entity": "audit_logs",
+    "conditions": [
+      {"field": "resource_id", "operator": "eq", "value": "t_004"}
+    ]
+  },
+  "expect": {"status": "rejected", "code": "SCAN_REQUIRED"}
+}

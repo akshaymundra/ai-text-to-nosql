@@ -1,0 +1,13 @@
+{
+  "id": "031-users-name-starts-with",
+  "request": "Users whose name starts with A",
+  "now": "2026-10-07T12:00:00Z",
+  "tags": ["reject", "scan"],
+  "ir": {
+    "entity": "users",
+    "conditions": [
+      {"field": "name", "operator": "begins_with", "value": "A"}
+    ]
+  },
+  "expect": {"status": "rejected", "code": "SCAN_REQUIRED"}
+}

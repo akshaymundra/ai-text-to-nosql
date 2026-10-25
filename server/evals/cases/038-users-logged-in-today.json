@@ -1,0 +1,13 @@
+{
+  "id": "038-users-logged-in-today",
+  "request": "Users who logged in today",
+  "now": "2026-10-07T12:00:00Z",
+  "tags": ["reject", "scan", "relative-date"],
+  "ir": {
+    "entity": "users",
+    "conditions": [
+      {"field": "last_login_at", "operator": "eq", "value": "2026-10-07"}
+    ]
+  },
+  "expect": {"status": "rejected", "code": "SCAN_REQUIRED"}
+}

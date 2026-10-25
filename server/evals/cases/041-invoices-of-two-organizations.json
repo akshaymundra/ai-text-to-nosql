@@ -1,0 +1,13 @@
+{
+  "id": "041-invoices-of-two-organizations",
+  "request": "Invoices of acme or globex",
+  "now": "2026-10-07T12:00:00Z",
+  "tags": ["reject", "scan", "in"],
+  "ir": {
+    "entity": "invoices",
+    "conditions": [
+      {"field": "organization_id", "operator": "in", "value": ["acme", "globex"]}
+    ]
+  },
+  "expect": {"status": "rejected", "code": "SCAN_REQUIRED"}
+}

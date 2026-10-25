@@ -1,0 +1,14 @@
+{
+  "id": "044-invoice-amount-starts-with",
+  "request": "Acme invoices whose amount starts with 49",
+  "now": "2026-10-07T12:00:00Z",
+  "tags": ["reject", "operator-type"],
+  "ir": {
+    "entity": "invoices",
+    "conditions": [
+      {"field": "organization_id", "operator": "eq", "value": "acme"},
+      {"field": "amount", "operator": "begins_with", "value": 49}
+    ]
+  },
+  "expect": {"status": "rejected", "code": "OPERATOR_TYPE_MISMATCH", "field": "amount"}
+}

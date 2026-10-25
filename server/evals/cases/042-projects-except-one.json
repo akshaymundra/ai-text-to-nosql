@@ -1,0 +1,14 @@
+{
+  "id": "042-projects-except-one",
+  "request": "Acme projects other than p_001",
+  "now": "2026-10-07T12:00:00Z",
+  "tags": ["reject", "key-operator", "ne"],
+  "ir": {
+    "entity": "projects",
+    "conditions": [
+      {"field": "organization_id", "operator": "eq", "value": "acme"},
+      {"field": "project_id", "operator": "ne", "value": "p_001"}
+    ]
+  },
+  "expect": {"status": "rejected", "code": "INVALID_KEY_CONDITION", "field": "project_id"}
+}

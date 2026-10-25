@@ -1,0 +1,13 @@
+{
+  "id": "034-invoices-in-currency",
+  "request": "Invoices billed in EUR",
+  "now": "2026-10-07T12:00:00Z",
+  "tags": ["reject", "scan"],
+  "ir": {
+    "entity": "invoices",
+    "conditions": [
+      {"field": "currency", "operator": "eq", "value": "EUR"}
+    ]
+  },
+  "expect": {"status": "rejected", "code": "SCAN_REQUIRED"}
+}

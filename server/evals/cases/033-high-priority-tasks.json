@@ -1,0 +1,13 @@
+{
+  "id": "033-high-priority-tasks",
+  "request": "Tasks with high priority",
+  "now": "2026-10-07T12:00:00Z",
+  "tags": ["reject", "scan"],
+  "ir": {
+    "entity": "tasks",
+    "conditions": [
+      {"field": "priority", "operator": "eq", "value": "high"}
+    ]
+  },
+  "expect": {"status": "rejected", "code": "SCAN_REQUIRED"}
+}
