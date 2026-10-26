@@ -1,0 +1,13 @@
+{
+  "id": "h16-invoice-number-contains",
+  "request": "invoices whose number contains 00",
+  "now": "2026-10-14T09:30:00Z",
+  "tags": ["reject", "scan", "contains"],
+  "ir": {
+    "entity": "invoices",
+    "conditions": [
+      {"field": "invoice_id", "operator": "contains", "value": "00"}
+    ]
+  },
+  "expect": {"status": "rejected", "code": "SCAN_REQUIRED"}
+}

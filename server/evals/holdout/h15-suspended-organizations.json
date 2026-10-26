@@ -1,0 +1,13 @@
+{
+  "id": "h15-suspended-organizations",
+  "request": "which organizations are suspended?",
+  "now": "2026-10-14T09:30:00Z",
+  "tags": ["reject", "scan"],
+  "ir": {
+    "entity": "organizations",
+    "conditions": [
+      {"field": "status", "operator": "eq", "value": "suspended"}
+    ]
+  },
+  "expect": {"status": "rejected", "code": "SCAN_REQUIRED"}
+}

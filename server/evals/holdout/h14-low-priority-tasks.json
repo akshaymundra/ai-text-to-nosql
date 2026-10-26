@@ -1,0 +1,13 @@
+{
+  "id": "h14-low-priority-tasks",
+  "request": "show tasks with low priority",
+  "now": "2026-10-14T09:30:00Z",
+  "tags": ["reject", "scan"],
+  "ir": {
+    "entity": "tasks",
+    "conditions": [
+      {"field": "priority", "operator": "eq", "value": "low"}
+    ]
+  },
+  "expect": {"status": "rejected", "code": "SCAN_REQUIRED"}
+}

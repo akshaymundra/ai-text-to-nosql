@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 	"encoding/json"
+	"flag"
 	"fmt"
 	"log"
 	"time"
@@ -17,6 +18,9 @@ import (
 )
 
 func main() {
+	dir := flag.String("dir", "evals/cases", "case directory: evals/cases (tuning) or evals/holdout (never tune against it)")
+	flag.Parse()
+
 	config.Init()
 	cfg := config.GetInstance()
 	ctx := context.Background()
@@ -31,7 +35,7 @@ func main() {
 	if err != nil {
 		log.Fatalf("workspace %q: %v (run make register-demo first)", cfg.DemoWorkspace, err)
 	}
-	cases, err := evals.LoadCases("evals/cases")
+	cases, err := evals.LoadCases(*dir)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -43,8 +47,8 @@ func main() {
 		service.NewFieldSuggester(client, cfg.EmbeddingModel),
 	)
 
-	fmt.Printf("model %s  seed %d  prompt %s  embeddings %s  cases %d\n\n",
-		cfg.ExtractionModel, cfg.ExtractionSeed, extraction.PromptVersion, cfg.EmbeddingModel, len(cases))
+	fmt.Printf("model %s  seed %d  prompt %s  embeddings %s  cases %d from %s\n\n",
+		cfg.ExtractionModel, cfg.ExtractionSeed, extraction.PromptVersion, cfg.EmbeddingModel, len(cases), *dir)
 
 	start := time.Now()
 	results := make([]evals.CaseResult, 0, len(cases))

@@ -1,0 +1,23 @@
+{
+  "id": "h06-assignee-tasks-due-before",
+  "request": "list u_005's tasks that are due before October 20",
+  "now": "2026-10-14T09:30:00Z",
+  "tags": ["gsi", "sort-key", "date-range"],
+  "ir": {
+    "entity": "tasks",
+    "conditions": [
+      {"field": "assignee_id", "operator": "eq", "value": "u_005"},
+      {"field": "due_date", "operator": "lt", "value": "2026-10-20"}
+    ]
+  },
+  "expect": {
+    "status": "valid",
+    "table": "tasks",
+    "index": "assignee-due-date-index",
+    "query": {
+      "KeyConditionExpression": "#n0 = :v0 AND #n1 < :v1",
+      "ExpressionAttributeNames": {"#n0": "assignee_id", "#n1": "due_date"},
+      "ExpressionAttributeValues": {":v0": "u_005", ":v1": "2026-10-20"}
+    }
+  }
+}

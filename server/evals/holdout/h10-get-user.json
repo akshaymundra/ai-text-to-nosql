@@ -1,0 +1,21 @@
+{
+  "id": "h10-get-user",
+  "request": "Get me user u_007",
+  "now": "2026-10-14T09:30:00Z",
+  "tags": ["table", "key-lookup"],
+  "ir": {
+    "entity": "users",
+    "conditions": [
+      {"field": "user_id", "operator": "eq", "value": "u_007"}
+    ]
+  },
+  "expect": {
+    "status": "valid",
+    "table": "users",
+    "query": {
+      "KeyConditionExpression": "#n0 = :v0",
+      "ExpressionAttributeNames": {"#n0": "user_id"},
+      "ExpressionAttributeValues": {":v0": "u_007"}
+    }
+  }
+}

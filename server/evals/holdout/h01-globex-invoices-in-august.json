@@ -1,0 +1,22 @@
+{
+  "id": "h01-globex-invoices-in-august",
+  "request": "pull up the invoices globex was billed in august",
+  "now": "2026-10-14T09:30:00Z",
+  "tags": ["table", "sort-key", "date-range", "relative-date"],
+  "ir": {
+    "entity": "invoices",
+    "conditions": [
+      {"field": "organization_id", "operator": "eq", "value": "globex"},
+      {"field": "issued_at", "operator": "between", "value": ["2026-08-01", "2026-08-31"]}
+    ]
+  },
+  "expect": {
+    "status": "valid",
+    "table": "invoices",
+    "query": {
+      "KeyConditionExpression": "#n0 = :v0 AND #n1 BETWEEN :v1 AND :v2",
+      "ExpressionAttributeNames": {"#n0": "organization_id", "#n1": "issued_at"},
+      "ExpressionAttributeValues": {":v0": "globex", ":v1": "2026-08-01T00:00:00Z", ":v2": "2026-08-31T23:59:59Z"}
+    }
+  }
+}

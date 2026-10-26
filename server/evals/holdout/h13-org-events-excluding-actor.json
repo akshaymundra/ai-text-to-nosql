@@ -1,0 +1,23 @@
+{
+  "id": "h13-org-events-excluding-actor",
+  "request": "acme audit log entries not done by u_002",
+  "now": "2026-10-14T09:30:00Z",
+  "tags": ["table", "filter", "ne", "exclusion"],
+  "ir": {
+    "entity": "audit_logs",
+    "conditions": [
+      {"field": "organization_id", "operator": "eq", "value": "acme"},
+      {"field": "actor_id", "operator": "ne", "value": "u_002"}
+    ]
+  },
+  "expect": {
+    "status": "valid",
+    "table": "audit_logs",
+    "query": {
+      "KeyConditionExpression": "#n0 = :v0",
+      "FilterExpression": "(#n1 <> :v1)",
+      "ExpressionAttributeNames": {"#n0": "organization_id", "#n1": "actor_id"},
+      "ExpressionAttributeValues": {":v0": "acme", ":v1": "u_002"}
+    }
+  }
+}

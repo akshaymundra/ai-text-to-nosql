@@ -56,7 +56,13 @@ Rules:
 - `now` is fixed per case (all current cases use `2026-10-07T12:00:00Z`). Relative dates resolve against it, never the wall clock.
 - Values come from `server/schemas-local/` data, so a valid case also returns rows when executed against DynamoDB Local.
 - Tags name what a case exercises (`gsi`, `table`, `sort-key`, `filter`, `date-range`, `relative-date`, `tie-break`, `reject`, `scan`, ...), so scores can be reported per feature. Reuse existing tags before adding new ones.
-- Current set: `001`-`030` valid, `031`-`046` rejected. Target 30 to 50 cases; grow it when a bug or a new feature needs one.
+- Current set: `001`-`030` valid, `031`-`046` rejected.
+
+## Held-out set (`server/evals/holdout/`)
+
+- Same format, ids `h<nn>-<slug>`, a different `now` (`2026-10-14T09:30:00Z`) and wording written without looking at prompt failures. `TestCases` checks its `expect` blocks like the tuning set.
+- **Never tune against it.** Read its failures only to report them. A prompt, schema or model change made because of a held-out failure burns that case: move it to `evals/cases/` (renumbered) and write a fresh held-out case in its place, saying so to the user.
+- Score it once per prompt version or model, after tuning on `evals/cases/` is done: `make eval-holdout`. The gap between the two scores is the overfitting signal. Target 30 to 50 cases; grow it when a bug or a new feature needs one.
 
 ## Running
 

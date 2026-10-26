@@ -1,0 +1,23 @@
+{
+  "id": "h09-plan-signups-this-year",
+  "request": "free plan organizations that signed up this year",
+  "now": "2026-10-14T09:30:00Z",
+  "tags": ["gsi", "sort-key", "date-range", "relative-date"],
+  "ir": {
+    "entity": "organizations",
+    "conditions": [
+      {"field": "plan", "operator": "eq", "value": "free"},
+      {"field": "created_at", "operator": "between", "value": ["2026-01-01", "2026-12-31"]}
+    ]
+  },
+  "expect": {
+    "status": "valid",
+    "table": "organizations",
+    "index": "plan-created-at-index",
+    "query": {
+      "KeyConditionExpression": "#n0 = :v0 AND #n1 BETWEEN :v1 AND :v2",
+      "ExpressionAttributeNames": {"#n0": "plan", "#n1": "created_at"},
+      "ExpressionAttributeValues": {":v0": "free", ":v1": "2026-01-01T00:00:00Z", ":v2": "2026-12-31T23:59:59Z"}
+    }
+  }
+}

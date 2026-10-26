@@ -1,0 +1,12 @@
+{
+  "id": "h17-users-by-salary",
+  "request": "users with a salary over 100000",
+  "now": "2026-10-14T09:30:00Z",
+  "tags": ["reject", "unknown-field", "unmapped-term"],
+  "ir": {
+    "entity": "users",
+    "conditions": []
+  },
+  "unmapped_terms": ["salary"],
+  "expect": {"status": "rejected", "code": "UNKNOWN_FIELD", "field": "salary"}
+}

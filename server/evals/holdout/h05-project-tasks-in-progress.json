@@ -1,0 +1,23 @@
+{
+  "id": "h05-project-tasks-in-progress",
+  "request": "tasks for project p_004 that are in progress",
+  "now": "2026-10-14T09:30:00Z",
+  "tags": ["gsi", "sort-key", "tie-break", "value-spelling"],
+  "ir": {
+    "entity": "tasks",
+    "conditions": [
+      {"field": "project_id", "operator": "eq", "value": "p_004"},
+      {"field": "status", "operator": "eq", "value": "in_progress"}
+    ]
+  },
+  "expect": {
+    "status": "valid",
+    "table": "tasks",
+    "index": "project-status-index",
+    "query": {
+      "KeyConditionExpression": "#n0 = :v0 AND #n1 = :v1",
+      "ExpressionAttributeNames": {"#n0": "project_id", "#n1": "status"},
+      "ExpressionAttributeValues": {":v0": "p_004", ":v1": "in_progress"}
+    }
+  }
+}

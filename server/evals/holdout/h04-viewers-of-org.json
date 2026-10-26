@@ -1,0 +1,24 @@
+{
+  "id": "h04-viewers-of-org",
+  "request": "Who has the viewer role at acme?",
+  "now": "2026-10-14T09:30:00Z",
+  "tags": ["gsi", "filter", "reserved-word"],
+  "ir": {
+    "entity": "users",
+    "conditions": [
+      {"field": "organization_id", "operator": "eq", "value": "acme"},
+      {"field": "role", "operator": "eq", "value": "viewer"}
+    ]
+  },
+  "expect": {
+    "status": "valid",
+    "table": "users",
+    "index": "organization-created-at-index",
+    "query": {
+      "KeyConditionExpression": "#n0 = :v0",
+      "FilterExpression": "(#n1 = :v1)",
+      "ExpressionAttributeNames": {"#n0": "organization_id", "#n1": "role"},
+      "ExpressionAttributeValues": {":v0": "acme", ":v1": "viewer"}
+    }
+  }
+}

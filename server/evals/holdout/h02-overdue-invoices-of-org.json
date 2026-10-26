@@ -1,0 +1,23 @@
+{
+  "id": "h02-overdue-invoices-of-org",
+  "request": "which acme invoices are overdue?",
+  "now": "2026-10-14T09:30:00Z",
+  "tags": ["table", "filter", "tie-break"],
+  "ir": {
+    "entity": "invoices",
+    "conditions": [
+      {"field": "organization_id", "operator": "eq", "value": "acme"},
+      {"field": "status", "operator": "eq", "value": "overdue"}
+    ]
+  },
+  "expect": {
+    "status": "valid",
+    "table": "invoices",
+    "query": {
+      "KeyConditionExpression": "#n0 = :v0",
+      "FilterExpression": "(#n1 = :v1)",
+      "ExpressionAttributeNames": {"#n0": "organization_id", "#n1": "status"},
+      "ExpressionAttributeValues": {":v0": "acme", ":v1": "overdue"}
+    }
+  }
+}

@@ -1,0 +1,22 @@
+{
+  "id": "h12-user-by-email",
+  "request": "find the user whose email is grace@gmail.com",
+  "now": "2026-10-14T09:30:00Z",
+  "tags": ["gsi", "key-lookup"],
+  "ir": {
+    "entity": "users",
+    "conditions": [
+      {"field": "email", "operator": "eq", "value": "grace@gmail.com"}
+    ]
+  },
+  "expect": {
+    "status": "valid",
+    "table": "users",
+    "index": "email-index",
+    "query": {
+      "KeyConditionExpression": "#n0 = :v0",
+      "ExpressionAttributeNames": {"#n0": "email"},
+      "ExpressionAttributeValues": {":v0": "grace@gmail.com"}
+    }
+  }
+}

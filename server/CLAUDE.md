@@ -43,6 +43,8 @@ make test     # go test -race ./...
 make lint     # golangci-lint run ./...
 make seed     # go run ./cmd/seed-local
 make register-demo   # needs the server running and DEMO_WORKSPACE_PASSWORD in .env; creates/logs in to workspace DEMO_WORKSPACE on SERVER_PORT and PUTs every schemas-local file (writes to Postgres: Akshay runs it)
+make eval           # read-only: runs every evals/cases request through retrieval, the extraction model and the pipeline; prints per-case PASS/FAIL and a score per tag
+make eval-holdout   # same over evals/holdout, which is never tuned against
 make eval-retrieval  # read-only: retrieves tables for every eval case request in demo-local, prints recall@1 and recall@3
 make migrate-create name=<snake_case_name>   # new goose migration in migrations/
 make migrate-status                          # read-only

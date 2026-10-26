@@ -23,29 +23,31 @@ func TestCases(t *testing.T) {
 	if err != nil {
 		t.Fatalf("loading schemas: %v", err)
 	}
-	cases, err := LoadCases("cases")
-	if err != nil {
-		t.Fatalf("loading cases: %v", err)
-	}
-	if len(cases) == 0 {
-		t.Fatal("no eval cases found")
-	}
+	for _, dir := range []string{"cases", "holdout"} {
+		cases, err := LoadCases(dir)
+		if err != nil {
+			t.Fatalf("loading %s: %v", dir, err)
+		}
+		if len(cases) == 0 {
+			t.Fatalf("no eval cases found in %s", dir)
+		}
 
-	for _, c := range cases {
-		t.Run(c.ID, func(t *testing.T) {
-			ex := extraction.Extraction{Query: c.IR, UnmappedTerms: c.UnmappedTerms}
-			result, err := service.BuildQuery(ex, tables, service.DefaultQueryLimit)
-			if err != nil {
-				t.Fatalf("build query: %v", err)
-			}
-			got, err := OutcomeOf(result)
-			if err != nil {
-				t.Fatalf("outcome: %v", err)
-			}
-			if diff := cmp.Diff(c.Expect, got); diff != "" {
-				t.Errorf("outcome mismatch (-expect +got):\n%s", diff)
-			}
-		})
+		for _, c := range cases {
+			t.Run(c.ID, func(t *testing.T) {
+				ex := extraction.Extraction{Query: c.IR, UnmappedTerms: c.UnmappedTerms}
+				result, err := service.BuildQuery(ex, tables, service.DefaultQueryLimit)
+				if err != nil {
+					t.Fatalf("build query: %v", err)
+				}
+				got, err := OutcomeOf(result)
+				if err != nil {
+					t.Fatalf("outcome: %v", err)
+				}
+				if diff := cmp.Diff(c.Expect, got); diff != "" {
+					t.Errorf("outcome mismatch (-expect +got):\n%s", diff)
+				}
+			})
+		}
 	}
 }
 
